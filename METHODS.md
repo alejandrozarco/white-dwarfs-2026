@@ -27,7 +27,7 @@
 - **HST/COS.** Dataset lfac0z010 (G130M, 2024-07-13, program 17420), taken from MAST. Equivalent widths are given against several continuum sideband choices.
 - **TESS.** SPOC PDCSAP light curves, with QUALITY = 0 and a 5σ clip, analysed with a Lomb-Scargle amplitude spectrum (step 0.001 c/d). S/N is the peak amplitude over the mean amplitude, and the false-alarm probability is Baluev's.
 - **TESS pixel test.** A sinusoid at the given frequency is fitted to each pixel of the SPOC target pixel file. The in-phase amplitude map is fitted with a single Gaussian PSF at each Gaia DR3 source, after re-registering the WCS on the median image. The table gives the chi2 for the target and for the best other source.
-- **ATLAS.** Forced-photometry difference fluxes (`data/atlas_forced_photometry_<gaia_dr3>.txt`).
+- **ATLAS.** Forced-photometry difference fluxes (`data/atlas_forced_photometry_<gaia_dr3>.txt`); the MJD column is the exposure start, so 15 s (half of the 30-s exposure) is added before conversion to BJD_TDB.
   - Cuts: duJy > 0, err = 0, chi/N < 10.
   - Per-season median subtraction, then conversion to BJD_TDB.
   - Eclipse of 4731701084150029824: a trapezoid with a common centre and width and a free depth per band.

@@ -3,7 +3,7 @@ curves and confirmed in ATLAS or ZTF (data/periodic_white_dwarfs_sources.csv; th
 
 Ground-based light curves:
 - ATLAS forced photometry (data/atlas_forced_photometry_<gaia_dr3>.txt; positions propagated to 2020.5): cuts duJy > 0, err == 0,
-  chi/N < 10, duJy < 3 x median; per-season median subtracted; 5-sigma clip; fractional flux relative to the Gaia synthetic SDSS
+  chi/N < 10, duJy < 3 x median; per-season median subtracted; 5-sigma clip; times MJD (exposure start) + 15 s; fractional flux relative to the Gaia synthetic SDSS
   magnitudes (VizieR J/A+A/674/A33, white-dwarf table), c = (g + r)/2 and o = (r + i)/2 in flux; where the star is not in that table,
   the Gaia G flux is used for both bands.
 - ZTF DR light curves (data/ztf_<gaia_dr3>.csv; IRSA light-curve service, 2 arcsec; 1.5 arcsec for 1094376947131876352): catflags == 0; each ZTF object/filter light curve
@@ -44,7 +44,7 @@ def load_atlas(gid):
         for sv in np.unique(season):
             f[season == sv] -= np.median(f[season == sv])
         clip = np.abs(f) < 5 * 1.4826 * np.median(np.abs(f)) + 3 * np.median(e)
-        t = Time(mjd[clip], format="mjd", scale="utc", location=GEO)
+        t = Time(mjd[clip] + 15.0 / 86400.0, format="mjd", scale="utc", location=GEO)
         T += list((t.tdb + t.light_travel_time(c0)).jd); Y += list(f[clip] / ref[b]); E += list(e[clip] / ref[b]); G += [f"ATLAS {b}"] * int(clip.sum())
     return np.array(T), np.array(Y), np.array(E), np.array(G)
 

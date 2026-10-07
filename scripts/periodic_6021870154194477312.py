@@ -2,7 +2,7 @@
 
 ATLAS forced photometry (data/atlas_forced_photometry_<gaia_dr3>.txt) at the Gaia DR3 positions of the star and of the three Gaia DR3
 sources within 13 arcsec (data/periodic_6021870154194477312_sources.csv). Cuts: duJy > 0, err == 0, chi/N < 10, duJy < 3 x median;
-per-season median subtracted; 5-sigma clip; times converted to BJD_TDB.
+per-season median subtracted; 5-sigma clip; times (MJD = exposure start, + 15 s to mid-exposure) converted to BJD_TDB.
 Frequency: generalised Lomb-Scargle of the combined c and o fluxes of the star (each band divided by its reference flux) over
 0.5-50 c/d, then a least-squares sinusoid with separate band offsets on a fine grid; the 1-sigma range is where chi2 <= chi2_min + chi2_r.
 Amplitudes: sinusoid plus first harmonic at the adopted frequency, per band. Fractional amplitudes use reference fluxes from the
@@ -41,7 +41,7 @@ def load_atlas(gid):
         for sv in np.unique(season):
             f[season == sv] -= np.median(f[season == sv])
         clip = np.abs(f) < 5 * 1.4826 * np.median(np.abs(f)) + 3 * np.median(e)
-        t = Time(mjd[clip], format="mjd", scale="utc", location=GEO); out[b] = dict(t=(t.tdb + t.light_travel_time(c0)).jd, f=f[clip], e=e[clip])
+        t = Time(mjd[clip] + 15.0 / 86400.0, format="mjd", scale="utc", location=GEO); out[b] = dict(t=(t.tdb + t.light_travel_time(c0)).jd, f=f[clip], e=e[clip])
     return out
 
 

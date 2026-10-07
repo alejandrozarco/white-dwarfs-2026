@@ -2,7 +2,7 @@
 sectors 97, 105, 106; SAP flux, QUALITY == 0, divided by its median and scaled to the star's share of the aperture with the SPOC
 CROWDSAP value) and ATLAS forced photometry (data/atlas_forced_photometry_4851800979770492544.txt; cuts duJy > 0, err == 0, chi/N < 10,
 duJy < 3 x median; per-season median subtracted; fractional flux relative to the Gaia synthetic SDSS magnitudes c = (g + r)/2,
-o = (r + i)/2, J/A+A/674/A33; times to BJD_TDB).
+o = (r + i)/2, J/A+A/674/A33; times: ATLAS MJD is the exposure start, + 15 s to mid-exposure, then BJD_TDB).
 Period search: a box of 2.5-min half-width is slid over a grid of frequency and phase; the frequency and reference time that maximise the
 summed eclipse depth are refined by timing every cycle with at least four points within 6 min (box centre on a 0.05-min grid, only
 cycles whose in-box deficit exceeds 0.8 in units of the star's flux); a linear ephemeris is fitted to the mid-times, with the
@@ -66,7 +66,7 @@ for b in ("c", "o"):
     mjd = np.array([float(r["MJD"]) for r in x]); fl = np.array([float(r["uJy"]) for r in x]); e = np.array([float(r["duJy"]) for r in x])
     season = np.floor((mjd - 57000) / 365.25 + 0.3).astype(int)
     for sv in np.unique(season): fl[season == sv] -= np.median(fl[season == sv])
-    tb = Time(mjd, format="mjd", scale="utc", location=geo); bjd = (tb.tdb + tb.light_travel_time(c0)).jd; fr_ = fl / ref[b]
+    tb = Time(mjd + 15.0 / 86400.0, format="mjd", scale="utc", location=geo); bjd = (tb.tdb + tb.light_travel_time(c0)).jd; fr_ = fl / ref[b]
     pha = ((bjd - T0) / P + 0.5) % 1 - 0.5; dm = pha * P * 1440; ine = np.abs(dm) < 2.0; out = np.abs(dm) > 8
     shifts = np.arange(-10, 10.1, 1.0); scan = [float(np.mean(fr_[np.abs(dm - sh) < 2.0])) if (np.abs(dm - sh) < 2.0).sum() > 3 else np.nan for sh in shifts]
     atl[b] = dict(n=len(x), mjd_first=round(mjd.min(), 1), mjd_last=round(mjd.max(), 1), in_eclipse_n=int(ine.sum()), in_eclipse_mean=round(float(np.mean(fr_[ine])), 3), in_eclipse_err=round(float(np.std(fr_[ine]) / np.sqrt(max(ine.sum(), 1))), 3),

@@ -1,6 +1,6 @@
 """Eclipse ephemeris of Gaia DR3 4731701084150029824 from ATLAS forced photometry (data/atlas_forced_photometry_4731701084150029824.txt;
 difference fluxes uJy, bands o and c). Cuts: duJy > 0, err == 0, chi/N < 10, duJy < 3 x median; per-season median subtracted;
-5-sigma clip; times converted to BJD_TDB. Model per band: offset + trapezoid (common centre, total width, flat fraction) with free
+5-sigma clip; times (MJD = exposure start, + 15 s to mid-exposure) converted to BJD_TDB. Model per band: offset + trapezoid (common centre, total width, flat fraction) with free
 depth, offset and depth solved linearly on a grid; period from the chi2 minimum, error from delta chi2 = 1 after scaling chi2_r to 1."""
 import numpy as np
 from astropy.time import Time
@@ -18,7 +18,7 @@ for b in ("o", "c"):
     for sv in np.unique(season):
         f[season == sv] -= np.median(f[season == sv])
     clip = np.abs(f) < 5 * 1.4826 * np.median(np.abs(f)) + 3 * np.median(e)
-    t = Time(mjd[clip], format="mjd", scale="utc", location=geo); D[b] = dict(t=(t.tdb + t.light_travel_time(c0)).jd, f=f[clip], e=e[clip])
+    t = Time(mjd[clip] + 15.0 / 86400.0, format="mjd", scale="utc", location=geo); D[b] = dict(t=(t.tdb + t.light_travel_time(c0)).jd, f=f[clip], e=e[clip])
 Tref = 2460670.38343
 
 

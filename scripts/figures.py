@@ -139,7 +139,7 @@ def galex():
 def eclipse():
     ns = {}
     exec(open("j0353_eclipse.py").read().split("Tref = 2460670.38343")[0], ns)
-    D = ns["D"]; P = 0.14786971; T0 = 2460670.38336
+    D = ns["D"]; P = 0.14786971; T0 = 2460670.38350
     fig, ax = plt.subplots(2, 1, figsize=(8, 6), sharex=True)
     for a, b in zip(ax, ("o", "c")):
         ph = ((D[b]["t"] - T0) / P + 0.5) % 1 - 0.5; a.errorbar(ph, D[b]["f"], D[b]["e"], fmt=".", ms=2, color="0.6", elinewidth=0.3, alpha=0.5)
@@ -167,7 +167,7 @@ def eclipse_4851800979770492544():
         mjd = np.array([float(r["MJD"]) for r in x]); f = np.array([float(r["uJy"]) for r in x]); e = np.array([float(r["duJy"]) for r in x])
         season = np.floor((mjd - 57000) / 365.25 + 0.3).astype(int)
         for sv in np.unique(season): f[season == sv] -= np.median(f[season == sv])
-        tb = Time(mjd, format="mjd", scale="utc", location=geo); bjd = (tb.tdb + tb.light_travel_time(c0)).jd; ph = ((bjd - T0) / P + 0.5) % 1 - 0.5
+        tb = Time(mjd + 15.0 / 86400.0, format="mjd", scale="utc", location=geo); bjd = (tb.tdb + tb.light_travel_time(c0)).jd; ph = ((bjd - T0) / P + 0.5) % 1 - 0.5
         a.errorbar(ph, f / ref[b], e / ref[b], fmt=".", ms=2, color="0.6", elinewidth=0.3, alpha=0.5)
         edges = np.linspace(-0.5, 0.5, 61); c = 0.5 * (edges[1:] + edges[:-1]); idx = np.digitize(ph, edges) - 1
         mb = [np.average((f / ref[b])[idx == i], weights=1 / (e / ref[b])[idx == i] ** 2) if np.any(idx == i) else np.nan for i in range(60)]

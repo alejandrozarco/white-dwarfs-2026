@@ -7,7 +7,7 @@ Light curves:
   variability-rejection flag; fractional flux about the median; TimeG/BP/RP + 2455197.5 used as BJD.
 - ATLAS forced photometry (data/atlas_forced_photometry_<gaia_dr3>.txt; c and o bands) where it exists: duJy > 0, err == 0, chi/N < 10,
   duJy below three times the band median; per-season (365.25-d) median flux subtracted; fractional flux relative to the G-band flux
-  3631e6 x 10^(-0.4 G) uJy; MJD (UTC) converted to BJD_TDB at the star's position.
+  3631e6 x 10^(-0.4 G) uJy; MJD (UTC, exposure start) + 15 s (mid-exposure) converted to BJD_TDB at the star's position.
 - TESS: SPOC 120-s PDCSAP light curves (QUALITY == 0) where they exist; otherwise TESScut full-frame-image cutouts (7 x 7 pixels):
   3 x 3-pixel aperture on the target pixel, per-cadence background = median of the outer ring of pixels, times 9. A 1-day running median
   is subtracted and points beyond 5 sigma are clipped. PDCSAP fractions include the SPOC crowding correction; FFI fractions are relative
@@ -101,7 +101,7 @@ def atlas(gid, ra, dec, G):
         for sv in np.unique(season):
             f[season == sv] -= np.median(f[season == sv])
         clip = np.abs(f) < 5 * 1.4826 * np.median(np.abs(f)) + 3 * np.median(e)
-        t = Time(mjd[clip], format="mjd", scale="utc", location=geo); bjd = (t.tdb + t.light_travel_time(c0)).jd
+        t = Time(mjd[clip] + 15.0 / 86400.0, format="mjd", scale="utc", location=geo); bjd = (t.tdb + t.light_travel_time(c0)).jd
         out[f"ATLAS {b}"] = (np.array(bjd), f[clip] / ref, e[clip] / ref)
     return out
 
