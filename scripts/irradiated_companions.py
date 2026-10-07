@@ -2,16 +2,18 @@
 
 Light curves:
 - ZTF DR (data/ztf_<gaia_dr3>.csv; IRSA light-curve service, 1.5 arcsec): catflags == 0, magerr < 0.25; each ZTF object/filter light
-  curve converted to fractional flux about its median; light curves with fewer than 15 points dropped.
+  curve converted to fractional flux about its median; light curves with fewer than 15 points dropped; times mjd (UTC, exposure start)
+  + exptime/2 converted to BJD_TDB at the star's position.
 - Gaia DR3 epoch photometry (data/gaia_dr3_epoch_photometry_<gaia_dr3>.csv; VizieR I/355/epphot): G, BP and RP transits without the
-  variability-rejection flag; fractional flux about the median; TimeG/BP/RP + 2455197.5 used as BJD.
+  variability-rejection flag; fractional flux about the median; TimeG/BP/RP + 2455197.5 (BJD in TCB) converted to BJD_TDB.
 - ATLAS forced photometry (data/atlas_forced_photometry_<gaia_dr3>.txt; c and o bands) where it exists: duJy > 0, err == 0, chi/N < 10,
   duJy below three times the band median; per-season (365.25-d) median flux subtracted; fractional flux relative to the G-band flux
   3631e6 x 10^(-0.4 G) uJy; MJD (UTC, exposure start) + 15 s (mid-exposure) converted to BJD_TDB at the star's position.
 - TESS: SPOC 120-s PDCSAP light curves (QUALITY == 0) where they exist; otherwise TESScut full-frame-image cutouts (7 x 7 pixels):
   3 x 3-pixel aperture on the target pixel, per-cadence background = median of the outer ring of pixels, times 9. A 1-day running median
   is subtracted and points beyond 5 sigma are clipped. PDCSAP fractions include the SPOC crowding correction; FFI fractions are relative
-  to the total aperture flux and are not corrected for other stars in the aperture.
+  to the absolute value of the median background-subtracted aperture flux (which can be negative for faint stars) and are not corrected
+  for other stars in the aperture.
 Per data set: the highest Lomb-Scargle peak (0.5-50 c/d; 2-60 c/d for TESS) with its Baluev false-alarm probability, and the semi-amplitude
 of the fundamental of a sinusoid-plus-first-harmonic fit at the adopted frequency.
 Adopted frequency: common-phase sinusoid over ZTF, TESS and Gaia G; each data set is divided by its own semi-amplitude (independent fit at
@@ -44,6 +46,7 @@ SRC = pd.read_csv(os.path.join(D, "irradiated_companions_sources.csv"), dtype={"
 TABLE_DA = "https://www.astro.umontreal.ca/~bergeron/CoolingModels/Tables/Table_DA"
 ZP = {"W1": 309.54, "W2": 171.787, "J": 1594.0, "Ks": 666.7}
 V = Vizier(columns=["**"], row_limit=-1); V.TIMEOUT = 300
+PALOMAR = EarthLocation.from_geodetic(lon=-116.8597 * u.deg, lat=33.3563 * u.deg, height=1712 * u.m)
 
 
 def gaia_info(gid):
@@ -63,7 +66,8 @@ def gaia_epochs(gid):
     e = pd.read_csv(p); out = {}
     for b, tc, fc, ec, fl in (("G", "TimeG", "FG", "e_FG", "GrVFlag"), ("BP", "TimeBP", "FBP", "e_FBP", "BPrVFlag"), ("RP", "TimeRP", "FRP", "e_FRP", "RPrVFlag")):
         m = np.isfinite(e[tc]) & np.isfinite(e[fc]) & (e[fc] > 0) & (e[fl] == 0)
-        f = e[fc][m].values; med = np.median(f); out[f"Gaia {b}"] = (e[tc][m].values + 2455197.5, f / med - 1, e[ec][m].values / med)
+        f = e[fc][m].values; med = np.median(f); tb = Time(np.full(m.sum(), 2455197.5), e[tc][m].values, format="jd", scale="tcb").tdb.jd
+        out[f"Gaia {b}"] = (tb, f / med - 1, e[ec][m].values / med)
     return out
 
 
@@ -78,7 +82,9 @@ def ztf(gid):
             if len(s) < 15:
                 continue
             fl = 10 ** (-0.4 * (s.mag.values - np.median(s.mag.values))) - 1
-            t += list(s.hjd.values); y += list(fl - np.mean(fl)); e += list(0.921 * s.magerr.values * (fl + 1))
+            tm = Time(s.mjd.values + s.exptime.values / 2 / 86400.0, format="mjd", scale="utc", location=PALOMAR)  # mjd = exposure start (UTC)
+            t += list((tm.tdb + tm.light_travel_time(SkyCoord(np.median(s.ra) * u.deg, np.median(s.dec) * u.deg))).jd)
+            y += list(fl - np.mean(fl)); e += list(0.921 * s.magerr.values * (fl + 1))
         if t:
             out[f"ZTF {band}"] = tuple(map(np.array, (t, y, e)))
     return out
@@ -136,7 +142,8 @@ def tess_ffi(ra, dec, sectors):
         q = (d["QUALITY"] == 0) & np.isfinite(d["TIME"]); fl = d["FLUX"][q]; t = d["TIME"][q] + 2457000.0
         yy, xx = np.mgrid[0:fl.shape[1], 0:fl.shape[2]]; ring = (np.abs(xx - xi) > 1) | (np.abs(yy - yi) > 1)
         ap = (np.abs(xx - xi) <= 1) & (np.abs(yy - yi) <= 1); lc = np.nansum(fl[:, ap], axis=1) - np.nanmedian(fl[:, ring], axis=1) * ap.sum()
-        ok = np.isfinite(lc); out[f"TESS S{sec} FFI"] = detrend(t[ok], lc[ok] / np.median(lc[ok]) - 1)
+        ok = np.isfinite(lc); m0 = np.median(lc[ok])
+        out[f"TESS S{sec} FFI"] = detrend(t[ok], (lc[ok] - m0) / abs(m0))  # abs(): a negative median (background over-subtraction) would invert the signal
     return out
 
 

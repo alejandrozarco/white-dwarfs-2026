@@ -9,7 +9,7 @@ Amplitudes: sinusoid plus first harmonic at the adopted frequency, per band. Fra
 Gaia-synthesised SDSS magnitudes of the Gaia DR3 white dwarf catalogue (J/A+A/674/A33: g 17.7409, r 18.1185, i 18.5434):
 c = (g + r)/2 and o = (r + i)/2 in flux.
 Gaia DR3 epoch photometry (VizieR I/355/epphot; data/gaia_dr3_epoch_photometry_6021870154194477312.csv): transits with a rejection
-flag removed; TimeG + 2455197.5 is used as BJD (the TCB-TDB offset of ~19 s is ignored).
+flag removed; TimeG + 2455197.5 is BJD in TCB, converted to BJD_TDB (TCB - TDB is about 19 s).
 TESS: SPOC PDCSAP light curve of TIC 1251484163, sector 65 (120 s), QUALITY == 0, 5-sigma clip. PDCSAP includes the SPOC crowding
 correction (CROWDSAP), so its amplitude depends on that correction.
 Phase: t_max is the first maximum of the fitted fundamental after T0 = BJD 2458000.0, using the adopted frequency for all data
@@ -49,7 +49,7 @@ def load_gaia():
     d = pd.read_csv(os.path.join(D, f"gaia_dr3_epoch_photometry_{GID}.csv")); out = {}
     for b, tc, fc, ec, flag in (("G", "TimeG", "FG", "e_FG", "GrVFlag"), ("BP", "TimeBP", "FBP", "e_FBP", "BPrVFlag"), ("RP", "TimeRP", "FRP", "e_FRP", "RPrVFlag")):
         s = d[(d[flag] == 0) & np.isfinite(d[fc]) & np.isfinite(d[tc])]; med = np.median(s[fc])
-        out[b] = dict(t=s[tc].values + 2455197.5, f=s[fc].values / med - 1, e=s[ec].values / med)
+        out[b] = dict(t=Time(np.full(len(s), 2455197.5), s[tc].values, format="jd", scale="tcb").tdb.jd, f=s[fc].values / med - 1, e=s[ec].values / med)
     return out
 
 

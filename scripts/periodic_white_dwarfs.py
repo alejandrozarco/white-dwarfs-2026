@@ -7,12 +7,13 @@ Ground-based light curves:
   magnitudes (VizieR J/A+A/674/A33, white-dwarf table), c = (g + r)/2 and o = (r + i)/2 in flux; where the star is not in that table,
   the Gaia G flux is used for both bands.
 - ZTF DR light curves (data/ztf_<gaia_dr3>.csv; IRSA light-curve service, 2 arcsec; 1.5 arcsec for 1094376947131876352): catflags == 0; each ZTF object/filter light curve
-  converted to fractional flux about its median; light curves with fewer than 20 points dropped.
+  converted to fractional flux about its median; light curves with fewer than 20 points dropped; times mjd (UTC, exposure start) +
+  exptime/2 converted to BJD_TDB.
 Frequency: generalised Lomb-Scargle over 0.05-50 c/d (Baluev false-alarm probability of the highest peak), then a least-squares
 sinusoid with one offset per light curve on a fine grid; the uncertainty is the half-range where chi2 <= chi2_min + chi2_r.
 Amplitudes: sinusoid plus first harmonic at the adopted frequency; for ZTF also per filter (rows "ZTF zg", "ZTF zr").
 Gaia DR3 epoch photometry (VizieR I/355/epphot; data/gaia_dr3_epoch_photometry_<gaia_dr3>.csv), where it exists: G transits without a
-rejection flag; TimeG + 2455197.5 used as BJD. TESS (where SPOC light curves exist): PDCSAP, QUALITY == 0, 5-sigma clip, highest peak over 0.2-50 c/d.
+rejection flag; TimeG + 2455197.5 is BJD in TCB, converted to BJD_TDB (TCB - TDB is about 19 s). TESS (where SPOC light curves exist): PDCSAP, QUALITY == 0, 5-sigma clip, highest peak over 0.2-50 c/d.
 t_max: first maximum of the fitted fundamental after T0 = BJD 2458000.0 at the adopted frequency.
 Usage: python periodic_white_dwarfs.py (writes ../tables/periodic_white_dwarfs.csv)."""
 import os, subprocess, numpy as np, pandas as pd
@@ -23,7 +24,7 @@ from astropy.coordinates import SkyCoord, EarthLocation
 import astropy.units as u
 
 D = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
-T0 = 2458000.0; GEO = EarthLocation.from_geocentric(0, 0, 0, unit="m")
+T0 = 2458000.0; GEO = EarthLocation.from_geocentric(0, 0, 0, unit="m"); PALOMAR = EarthLocation.from_geodetic(lon=-116.8597 * u.deg, lat=33.3563 * u.deg, height=1712 * u.m)
 SRC = pd.read_csv(os.path.join(D, "periodic_white_dwarfs_sources.csv"), dtype={"gaia_dr3": str}).set_index("gaia_dr3")
 TESS = {"6722639595190126208": ("1697348546", (93, 104)), "3161618477052648192": ("761696261", (71, 72, 87)), "2883364038621038208": ("705345754", (87, 98)), "2888030331609338240": ("705508671", (98,)), "6639666736903611136": ("201655627", (27, 67, 94, 103, 104)),
         "974895286283420160": ("407569944", (20, 47, 60)), "2795150147707769728": ("611449439", (57,)),
@@ -55,7 +56,7 @@ def load_ztf(gid):
     for (oid, band), x in d.groupby(["oid", "filtercode"]):
         if len(x) < 20:
             continue
-        t = Time(x.mjd.values, format="mjd", scale="utc", location=GEO)
+        t = Time(x.mjd.values + x.exptime.values / 2 / 86400.0, format="mjd", scale="utc", location=PALOMAR)  # mjd = exposure start (UTC)
         T += list((t.tdb + t.light_travel_time(c0)).jd); Y += list(10 ** (-0.4 * (x.mag.values - np.median(x.mag))) - 1)
         E += list(0.921 * x.magerr.values); G += [f"ZTF {band} {oid}"] * len(x)
     return np.array(T), np.array(Y), np.array(E), np.array(G)
@@ -63,7 +64,7 @@ def load_ztf(gid):
 
 def load_gaia(gid):
     d = pd.read_csv(os.path.join(D, f"gaia_dr3_epoch_photometry_{gid}.csv")); d = d[(d.GrVFlag == 0) & np.isfinite(d.FG) & np.isfinite(d.TimeG)]
-    return d.TimeG.values + 2455197.5, d.FG.values / np.median(d.FG) - 1, d.e_FG.values / np.median(d.FG)
+    return Time(np.full(len(d), 2455197.5), d.TimeG.values, format="jd", scale="tcb").tdb.jd, d.FG.values / np.median(d.FG) - 1, d.e_FG.values / np.median(d.FG)
 
 
 def sinefit(t, y, e, f, groups=None, harm=2):

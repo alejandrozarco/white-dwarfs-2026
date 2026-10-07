@@ -2,13 +2,14 @@
 
 Light curves:
 - ZTF DR light curves (data/ztf_<gaia_dr3>.csv; IRSA light-curve service, 1.5 arcsec): catflags == 0, magerr < 0.25; each ZTF
-  object/filter light curve converted to fractional flux about its median; light curves with fewer than 20 points dropped.
+  object/filter light curve converted to fractional flux about its median; light curves with fewer than 20 points dropped; times mjd
+  (UTC, exposure start) + exptime/2 converted to BJD_TDB.
 - ATLAS forced photometry (data/atlas_forced_photometry_<gaia_dr3>.txt; positions propagated to 2020.5): cuts duJy > 0, err == 0,
   chi/N < 10, duJy < 3 x median; per-season median subtracted; 5-sigma clip; times MJD (exposure start) + 15 s; fractional flux relative to the Gaia synthetic SDSS
   magnitudes (VizieR J/A+A/674/A33, white-dwarf table), c = (g + r)/2 and o = (r + i)/2 in flux; where the star is not in that
   table, the Gaia G flux is used for both bands.
 - Gaia DR3 epoch photometry (data/gaia_dr3_epoch_photometry_<gaia_dr3>.csv; VizieR I/355/epphot), for the four stars that have it:
-  G transits without a rejection flag; TimeG + 2455197.5 used as BJD. The other stars are not in the published epoch-photometry table.
+  G transits without a rejection flag; TimeG + 2455197.5 is BJD in TCB, converted to BJD_TDB (TCB - TDB is about 19 s). The other stars are not in the published epoch-photometry table.
 Frequency: generalised Lomb-Scargle over 0.5-50 c/d (Baluev false-alarm probability of the highest peak); frequencies within
 0.03 c/d of 1, 2 and 3 c/d are excluded (1-day aliases); then a least-squares sinusoid with one offset per light curve on a fine
 grid; the uncertainty is the half-range where chi2 <= chi2_min + chi2_r, floored at 1/20 of the frequency resolution 1/T. Where data/hot_dae_wd_periods_sources.csv gives adopt_frequency_cd
@@ -24,7 +25,7 @@ from astropy.coordinates import SkyCoord, EarthLocation
 import astropy.units as u
 
 D = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
-T0 = 2458000.0; GEO = EarthLocation.from_geocentric(0, 0, 0, unit="m")
+T0 = 2458000.0; GEO = EarthLocation.from_geocentric(0, 0, 0, unit="m"); PALOMAR = EarthLocation.from_geodetic(lon=-116.8597 * u.deg, lat=33.3563 * u.deg, height=1712 * u.m)
 SRC = pd.read_csv(os.path.join(D, "hot_dae_wd_periods_sources.csv"), dtype={"gaia_dr3": str}).set_index("gaia_dr3")
 fl = lambda m: 3631e6 * 10 ** (-0.4 * m)
 
@@ -53,7 +54,7 @@ def load_ztf(gid):
     for (oid, band), x in d.groupby(["oid", "filtercode"]):
         if len(x) < 20:
             continue
-        t = Time(x.mjd.values, format="mjd", scale="utc", location=GEO)
+        t = Time(x.mjd.values + x.exptime.values / 2 / 86400.0, format="mjd", scale="utc", location=PALOMAR)  # mjd = exposure start (UTC)
         T += list((t.tdb + t.light_travel_time(c0)).jd); Y += list(10 ** (-0.4 * (x.mag.values - np.median(x.mag))) - 1)
         E += list(0.921 * x.magerr.values); G += [f"ZTF {band} {oid}"] * len(x)
     return np.array(T), np.array(Y), np.array(E), np.array(G)
@@ -64,7 +65,7 @@ def load_gaia(gid):
     if not os.path.exists(p):
         return None
     d = pd.read_csv(p); d = d[(d.GrVFlag == 0) & np.isfinite(d.FG) & np.isfinite(d.TimeG)]
-    return d.TimeG.values + 2455197.5, d.FG.values / np.median(d.FG) - 1, d.e_FG.values / np.median(d.FG)
+    return Time(np.full(len(d), 2455197.5), d.TimeG.values, format="jd", scale="tcb").tdb.jd, d.FG.values / np.median(d.FG) - 1, d.e_FG.values / np.median(d.FG)
 
 
 def sinefit(t, y, e, f, groups=None, harm=2):

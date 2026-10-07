@@ -5,9 +5,10 @@ Data:
   is Gaia DR3 3107374272762041856 (G = 16.17), 4.1 arcsec away; the CoRoT photometric mask also contains this star. BAR extension,
   STATUS == 0, DATEBARTT + 2400000.0 = BJD(TT). Per run: flux divided by its median, 3-day running median subtracted, 5-sigma clip.
 - ZTF DR light curves of this star and of the neighbour (../data/ztf_<gaia_dr3>.csv; IRSA light-curve service, 2 arcsec):
-  catflags == 0, magerr < 0.25; fractional flux about the median of each filter. HJD is used as BJD (difference < 10 s).
+  catflags == 0, magerr < 0.25; fractional flux about the median of each filter; times mjd (UTC, exposure start) + exptime/2
+  converted to BJD_TDB (the hjd column is HJD on the UTC scale, about 70 s earlier than BJD_TDB).
 - Gaia DR3 epoch photometry (../data/gaia_dr3_epoch_photometry_3107374277060584064.csv; VizieR I/355/epphot): G transits with
-  GrVFlag == 0; TimeG + 2455197.5 = BJD.
+  GrVFlag == 0; TimeG + 2455197.5 = BJD in TCB, converted to BJD_TDB (TCB - TDB is about 19 s).
 - SDSS-V DR20 visit spectra (sdss_id 74709777; sdssv.visits: XCSAO shift removed for in_stack visits).
 Per data set: generalised Lomb-Scargle over 0.05-20 c/d (highest peak, Baluev false-alarm probability) and a sinusoid plus first
 harmonic at the adopted frequency (amplitude and time of maximum after BJD 2459300.0).
@@ -16,12 +17,15 @@ common frequency and phase and one amplitude and offset per data set, on a grid 
 of the nearest cycle-count aliases is printed; chi2 is dominated by the CoRoT bins.
 Emission lines: per visit, Gaussian fits with a quadratic baseline to H-alpha (+-1800 km/s) and to the Ca II triplet (8500.35,
 8544.44, 8664.52 A; +-1200 km/s; common velocity and width, one amplitude per line); visit time = mean of the TAI start and end
-(no barycentric correction, < 0.01 in phase); phase 0 = maximum of the ZTF r fit. Zero-point check per visit: velocity of the He II
+(jd_mid, TAI); the phase uses that time converted to BJD_TDB at APO; phase 0 = maximum of the ZTF r fit. Zero-point check per visit: velocity of the He II
 4686 absorption line relative to the coadd of the in_stack visits (chi2 over +-900 km/s, linear continuum outside +-1200 km/s).
 Visits with in_stack = False are not in the SDSS-V coadd; their velocity zero point is not corrected and can be offset.
 Usage: python reflection_3107374277060584064.py (writes ../tables/reflection_3107374277060584064.csv and _visits.csv)."""
 import os, subprocess, numpy as np, pandas as pd
 from astropy.io import fits
+from astropy.time import Time
+from astropy.coordinates import SkyCoord, EarthLocation
+import astropy.units as u
 from astropy.timeseries import LombScargle
 from scipy.ndimage import median_filter
 from scipy.optimize import curve_fit
@@ -32,6 +36,7 @@ D = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data"); TAB 
 COROT = {"IRa01": "N2-4.4/2007/02/03/EN2_STAR_MON_0102743730_20070203T130553_20070402T070158.fits",
          "LRa01": "N2-4.4/2007/10/23/EN2_STAR_MON_0102743730_20071023T223035_20080303T093534.fits",
          "LRa06": "N2-4.4/2012/01/12/EN2_STAR_MON_0102743730_20120112T183055_20120329T092714.fits"}
+PALOMAR = EarthLocation.from_geodetic(lon=-116.8597 * u.deg, lat=33.3563 * u.deg, height=1712 * u.m)
 T0 = 2459300.0; C = 299792.458; CAT = [8500.35, 8544.44, 8664.52]
 
 
@@ -55,13 +60,14 @@ def ztf(gid):
     for band in ("zg", "zr"):
         s = d[d.filtercode == band]
         if len(s) >= 20:
-            f = 10 ** (-0.4 * (s.mag.values - np.median(s.mag))) - 1; out[f"ZTF {band}"] = (s.hjd.values, f, 0.921 * s.magerr.values * (f + 1))
+            f = 10 ** (-0.4 * (s.mag.values - np.median(s.mag))) - 1; tm = Time(s.mjd.values + s.exptime.values / 2 / 86400.0, format="mjd", scale="utc", location=PALOMAR)
+            t = (tm.tdb + tm.light_travel_time(SkyCoord(np.median(s.ra) * u.deg, np.median(s.dec) * u.deg))).jd; out[f"ZTF {band}"] = (t, f, 0.921 * s.magerr.values * (f + 1))
     return out
 
 
 def gaia():
     d = pd.read_csv(os.path.join(D, f"gaia_dr3_epoch_photometry_{GID}.csv")); d = d[(d.GrVFlag == 0) & np.isfinite(d.FG) & np.isfinite(d.TimeG)]
-    return d.TimeG.values + 2455197.5, d.FG.values / np.median(d.FG) - 1, d.e_FG.values / np.median(d.FG)
+    return Time(np.full(len(d), 2455197.5), d.TimeG.values, format="jd", scale="tcb").tdb.jd, d.FG.values / np.median(d.FG) - 1, d.e_FG.values / np.median(d.FG)
 
 
 def fit(t, y, e, f):
@@ -128,8 +134,10 @@ def emission(f, t_max):
     vs = visits(SDSS_ID); rows = []; zp = zero_point(vs)
     with fits.open(fetch(SDSS_ID, "visit")) as h:
         tm = {int(r["mjd"]): (r["tai_beg"] + r["tai_end"]) / 2 / 86400 + 2400000.5 for i in (1, 2) if h[i].data is not None and len(h[i].data) for r in h[i].data}
+    apo = EarthLocation.from_geodetic(lon=-105.8203 * u.deg, lat=32.7803 * u.deg, height=2788 * u.m); c0 = SkyCoord(101.158717 * u.deg, -0.763988 * u.deg)
+    tb = {k: Time(x, format="jd", scale="tai", location=apo) for k, x in tm.items()}; tb = {k: (x.tdb + x.light_travel_time(c0)).jd for k, x in tb.items()}  # BJD_TDB of the visit
     for v in vs:
-        row = dict(mjd=v["mjd"], jd_mid=round(tm[v["mjd"]], 4), phase=round(((tm[v["mjd"]] - t_max) * f) % 1, 3), snr=round(v["snr"], 1), in_stack=v["in_stack"],
+        row = dict(mjd=v["mjd"], jd_mid=round(tm[v["mjd"]], 4), phase=round(((tb[v["mjd"]] - t_max) * f) % 1, 3), snr=round(v["snr"], 1), in_stack=v["in_stack"],
                    xcsao_v_kms=round(v["xcsao_v"], 1), heii4686_abs_v_kms=round(zp[v["mjd"]][0]), heii4686_abs_e_v_kms=round(zp[v["mjd"]][1]))
         for name, lines, win in (("halpha", [6564.61], 1800), ("caii", CAT, 1200)):
             m = np.zeros(len(v["wave"]), bool)

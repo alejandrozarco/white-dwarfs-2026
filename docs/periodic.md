@@ -29,12 +29,12 @@ G = 17.27, parallax 1.82 ± 0.09 mas, BP−RP = −0.35. Existing classification
 - **Earlier listing.** Ferreira Lopes et al. (2025) list CoRoT 102743730 with P = 0.592812 d (class BCEP/other).
 - **SDSS-V spectrum** (four visits, 2021).
   - A blue continuum with He II 4686 Å absorption and weak Balmer absorption.
-  - H-alpha, H-beta and Ca II triplet emission in three visits (`tables/reflection_3107374277060584064_visits.csv`). The emission velocities are +242, −166 and +152 km/s (H-alpha) and +202, −73 and +147 km/s (Ca II) at phases 0.67, 0.23 and 0.90 from maximum light.
+  - H-alpha, H-beta and Ca II triplet emission in three visits (`tables/reflection_3107374277060584064_visits.csv`). The emission velocities are +242, −166 and +152 km/s (H-alpha) and +202, −73 and +147 km/s (Ca II) at phases 0.67, 0.22 and 0.89 from maximum light.
   - No emission in the S/N 4 visit at phase 0.41.
   - Two visits (MJD 59273 and 59324) are not in the SDSS-V stack (`in_stack = False`).
     - Their He II 4686 absorption lies at +205 ± 22 and +176 ± 16 km/s relative to the in-stack coadd. The two in-stack visits give −1 ± 12 and +15 ± 25 km/s.
     - The velocity zero point of those visits is therefore offset, by an amount similar to their XCSAO velocities (+73 and +137 km/s). The emission velocities of MJD 59324 are uncertain by about that amount.
-    - The in-stack visits (phases 0.67 and 0.90) are unaffected.
+    - The in-stack visits (phases 0.67 and 0.89) are unaffected.
 
 Folded light curves and emission-line velocities (phase 0 = maximum of the ZTF r fit):
 
