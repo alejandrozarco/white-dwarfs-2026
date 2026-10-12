@@ -22,6 +22,9 @@ def norm(w, f, iv, width=120, pct=85):
 
 def spectrum_for(row):
     s = str(row["spectrum"])
+    if s == "BOSS coadd":
+        from sdssv import boss_visits
+        return coadd(boss_visits(row["sdss_id"]))
     if s == "coadd":
         return coadd([x for x in visits(row["sdss_id"]) if x["in_stack"]])
     v = [x for x in visits(row["sdss_id"]) if str(x["mjd"]) == s.split()[-1]][0]

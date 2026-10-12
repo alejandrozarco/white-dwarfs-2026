@@ -8,7 +8,7 @@ S/N = quadrature sum of the visit S/N values. The Astra mwmStar coadd is not use
 Usage: python zeeman_split.py tables/magnetic_zeeman.csv  (columns gaia_dr3, sdss_id, spectrum = coadd or visit MJD)"""
 import sys, numpy as np, pandas as pd
 from scipy.optimize import least_squares
-from sdssv import visits, coadd
+from sdssv import visits, coadd, boss_visits
 L0 = {"Ha": 6564.61, "Hb": 4862.68}; K = {k: 4.67e-13 * v ** 2 * 1e6 for k, v in L0.items()}
 WIN = {"Ha": (6300, 6830), "Hb": (4660, 5060)}
 
@@ -34,11 +34,13 @@ def fit(x, y, iv, l0, dl0):
 
 
 def measure(sdss_id, spectrum="coadd"):
-    vs = visits(sdss_id)
-    if spectrum == "coadd":
+    if spectrum == "BOSS coadd":  # stars without Astra mwmVisit spectra: BOSS spec-lite epochs from data/boss_epochs.csv
+        vs = boss_visits(sdss_id); lam, f, iv = coadd(vs); snr = float(np.sqrt(np.sum([x["snr"] ** 2 for x in vs])))
+    elif spectrum == "coadd":
+        vs = visits(sdss_id)
         vs = [x for x in vs if x["in_stack"]]; lam, f, iv = coadd(vs); snr = float(np.sqrt(np.sum([x["snr"] ** 2 for x in vs])))
     else:
-        v = [x for x in vs if str(x["mjd"]) == str(spectrum)][0]; lam, f, iv, snr = v["wave"], v["flux"], v["ivar"], v["snr"]
+        vs = visits(sdss_id); v = [x for x in vs if str(x["mjd"]) == str(spectrum)][0]; lam, f, iv, snr = v["wave"], v["flux"], v["ivar"], v["snr"]
     out = dict(snr=round(snr, 1))
     for k in ("Ha", "Hb"):
         m = (lam > WIN[k][0]) & (lam < WIN[k][1]); p, C = fit(lam[m], f[m], iv[m], L0[k], 6.0 * K[k])

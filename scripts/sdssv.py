@@ -77,3 +77,28 @@ def coadd(vs, lo=3700, hi=9300, dlog=6e-5):
         iv = np.where(valid >= 1, iv, 0)  # a grid point bracketed by any rejected pixel gets zero weight: gaps stay gaps
         m = np.isfinite(f) & (iv > 0); num[m] += f[m] * iv[m]; den[m] += iv[m]
     return grid, np.where(den > 0, num / np.where(den > 0, den, 1), np.nan), den
+
+
+BOSS = "https://data.sdss.org/sas/dr20/spectro/boss/redux/v6_2_1/spectra/daily/lite"
+
+
+def boss_visits(sdss_id):
+    """BOSS v6_2_1 spec-lite epochs of one sdss_id listed in data/boss_epochs.csv (field, mjd, catalogid), for stars without Astra mwmVisit
+    spectra. Wavelengths are used as delivered (no XCSAO shift); snr = SN_MEDIAN_ALL."""
+    L = pd.read_csv(os.path.join(os.path.dirname(__file__), "..", "data", "boss_epochs.csv"), dtype=str); out = []
+    for r in L[L.sdss_id == str(sdss_id)].itertuples():
+        name = f"spec-{int(r.field):06d}-{r.mjd}-{r.catalogid}.fits"; path = os.path.join(CACHE, name); os.makedirs(CACHE, exist_ok=True)
+        if not (os.path.exists(path) and os.path.getsize(path) > 50000):
+            f = f"{int(r.field):06d}"; url = f"{BOSS}/{f[:3]}XXX/{f}/{r.mjd}/{name}"
+            for k in range(3):
+                q = requests.get(url, timeout=180)
+                if q.status_code == 200 and q.content[:6] == b"SIMPLE" and len(q.content) > 50000:
+                    open(path, "wb").write(q.content); break
+                time.sleep(3)
+            else:
+                raise IOError(f"download failed: {url}")
+        with fits.open(path) as h:
+            c = h[1].data; sp = h[2].data[0]
+            out.append(dict(mjd=int(sp["MJD"]), xcsao_v=float("nan"), in_stack=True, snr=float(sp["SN_MEDIAN_ALL"]), wave=10 ** np.array(c["LOGLAM"], float),
+                            flux=np.array(c["FLUX"], float), ivar=np.array(c["IVAR"], float), flags=np.array(c["AND_MASK"], np.int64)))
+    return out
