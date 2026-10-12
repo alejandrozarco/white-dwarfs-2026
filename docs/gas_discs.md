@@ -24,6 +24,8 @@ ZTF (69 r-band points, 2019-2026; `ztf_lightcurve.py`): seasonal medians within 
 ## WD J1959+2208 (Gaia DR3 1827014701883095680)
 G = 16.78, parallax 5.73 ± 0.07 mas; catalogued DB (SIMBAD, MWDD) and DBA/DB (SnowWhite). Both SDSS-V visits (2024-08-10 and 2024-08-11) show double-peaked Ca II emission, with peaks at about −260 and +430 km/s in the coadd. The equivalent width is 17.8 ± 0.5 Å and 26.6 ± 0.5 Å in the two visits. No other spectrum was found in SPARCL (SDSS, BOSS, DESI) or the ESO archive.
 
+Gaia DR3 lists a second source 0.97″ away (Gaia DR3 1827014701900880256, G = 18.44, no BP−RP colour, parallax 0.20 ± 0.25 mas), inside the 2″ BOSS fibre. Its light is included in both SDSS-V spectra, so the Ca II emission is not yet attributed to the white dwarf alone; a spectrum that resolves the two sources would settle it.
+
 <img src="../figures/gas_discs/1827014701883095680_sdssv.png" width="800">
 
 ZTF (about 4,000 g, r and i points, 2018-2026; `ztf_lightcurve.py`): rms 1.4-2.8% against errors of 1.3-1.9%. Three nights of high-cadence data (2018-08-13, 2018-08-14 and a 6.5-hour 30-s sequence on 2024-07-05) have no 10-minute bin more than 2.5% below the median. The highest peaks of the combined periodogram are at 1, 2 and 3 c/d (daily sampling); no peak is shared by all data sets.
