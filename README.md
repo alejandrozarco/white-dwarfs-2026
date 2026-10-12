@@ -14,7 +14,7 @@ Measurements of white dwarfs from public SDSS-V DR20 spectra (Astra 0.8.1), with
 |---|---|---|---|
 | Ca II triplet emission (gaseous discs) | [docs/gas_discs.md](docs/gas_discs.md) | `gas_disc_white_dwarfs.csv`, `gas_disc_epochs_*.csv`, `gas_disc_screen.csv`, `desi_gas_disc_screen.csv` | 6 |
 | Carbon lines | [docs/carbon.md](docs/carbon.md) | `carbon_white_dwarfs.csv`, `carbon_screen.csv`, `carbon_*_features.csv` | 9 |
-| Zeeman splitting | [docs/zeeman.md](docs/zeeman.md) | `magnetic_zeeman.csv` | 30 |
+| Zeeman splitting | [docs/zeeman.md](docs/zeeman.md) | `magnetic_zeeman.csv` | 31 |
 | Photometric periods | [docs/periodic.md](docs/periodic.md) | `periodic_6021870154194477312.csv`, `periodic_white_dwarfs.csv`, `reflection_3107374277060584064*.csv`, `tess_ffi_*.csv` | 18 |
 | TESS amplitude spectra | [docs/zz_ceti.md](docs/zz_ceti.md) | `zz_ceti_objects.csv`, `zz_ceti_tess_sectors.csv` | 5 |
 | Eclipse and Balmer emission | [docs/eclipse_and_emission.md](docs/eclipse_and_emission.md) | `eclipsing_4731701084150029824.csv`, `balmer_emission.csv` | 3 |
@@ -53,7 +53,7 @@ One page per object with the measurement and its supporting data (tables, input 
 | [GALEX J213644.9-515758](docs/objects/6465542891501713408.md) \*\* | White dwarf, G = 18.644; catalogued: SIMBAD WD*/DC:; MWDD DC:. | **C II/C I lines (CCF 1.6/10.5)** |
 | [GALEX J014648.4+400114](docs/objects/343958710690034944.md) \*\* | White dwarf, G = 18.645; catalogued: SIMBAD WD*/DB; MWDD DB. | **C II/C I lines (CCF 3.1/5.9)** |
 
-### Zeeman splitting (30)
+### Zeeman splitting (31)
 
 | object | description | measurement |
 |---|---|---|
@@ -87,6 +87,7 @@ One page per object with the measurement and its supporting data (tables, input 
 | [Gaia DR3 3327361677328480256](docs/objects/3327361677328480256.md) \*\* | DA white dwarf, G = 17.835; catalogued: SnowWhite DA; SIMBAD WD*/DA; MWDD DA. | **B = 3.57 MG** |
 | [GALEX J040038.6-615458](docs/objects/4679463733391272448.md) \*\* | DA white dwarf, G = 18.514; catalogued: SnowWhite DA; SIMBAD WD*/DA; MWDD DA. Common proper motion with Gaia DR3 4679466653969618816 (G 9.83) at 86 arcsec. | **B = 4.28 MG** |
 | [GALEX J050006.8+080244](docs/objects/3290180587821828480.md) \*\* | DA white dwarf, G = 18.906; catalogued: SnowWhite DA; SIMBAD WD*/DA; MWDD DA. | **B = 5.3 MG** |
+| [Gaia DR3 2102849596247412480](docs/objects/2102849596247412480.md) \*\* | DA white dwarf, G = 17.3; catalogued: SnowWhite DA; SIMBAD WD*/DA; MWDD DA. H-alpha fit unconstrained in the coadd (components blended at this field); sigma components visible near +-44 A in both visits. Zeeman triplet also in LAMOST DR11 obsid 1127102095 (2023-06-12). | **B = 2.14 MG (H-beta only)** |
 
 ### Photometric periods (20)
 

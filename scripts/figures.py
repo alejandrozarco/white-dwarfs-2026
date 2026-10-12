@@ -32,7 +32,7 @@ def zeeman_panel(ax, r, w, f, iv, ln, l0, lo, hi, label=True):
     m = (iv > 0) & np.isfinite(f) & (w > lo) & (w < hi); y = gaussian_filter1d(f[m], 1.5); y = y / np.median(y)
     ax.plot(w[m], y, "k", lw=0.7); ax.axvline(l0, color="0.6", lw=0.6, ls=":")
     for x in (r[f"{ln}_sigma_minus_A"], r[f"{ln}_pi_A"], r[f"{ln}_sigma_plus_A"]):
-        ax.axvline(x, color="r", lw=0.8)
+        if np.isfinite(x): ax.axvline(x, color="r", lw=0.8)
     ax.set_yticks([])
 
 
@@ -44,7 +44,7 @@ def zeeman():
         fig, ax = plt.subplots(1, 2, figsize=(10, 2.4))
         for a, (ln, l0, lo, hi, nm) in zip(ax, (("Ha", 6564.61, 6300, 6830, "H-alpha"), ("Hb", 4862.68, 4660, 5060, "H-beta"))):
             zeeman_panel(a, r, w, f, iv, ln, l0, lo, hi); a.set_xlabel("wavelength (A)")
-            a.set_title(f"{nm}: B_split {r[f'B_split_{ln}_MG']} MG", fontsize=8)
+            a.set_title(f"{nm}: B_split {r[f'B_split_{ln}_MG']} MG" if np.isfinite(float(r[f'B_split_{ln}_MG'])) else f"{nm}: fit unconstrained", fontsize=8)
         fig.suptitle(f"Gaia DR3 {r.gaia_dr3} ({r['name']}), SDSS-V {r.spectrum}, S/N {r.snr}; red: fitted component centres", fontsize=8)
         plt.tight_layout(); plt.savefig(out("zeeman", f"{r.gaia_dr3}.png"), dpi=90); plt.close()
     top = t.astype({"snr": float}).sort_values("snr", ascending=False).head(6)

@@ -1,6 +1,6 @@
 # Zeeman splitting
 
-`tables/magnetic_zeeman.csv` lists 30 SDSS-V white dwarfs whose H-alpha and H-beta are split into Zeeman components. Each line is fitted with three Gaussian components. B_split is the linear-Zeeman field implied by the separation of the two outer components (method in [METHODS.md](../METHODS.md#methods)).
+`tables/magnetic_zeeman.csv` lists 31 SDSS-V white dwarfs whose H-alpha and H-beta are split into Zeeman components. Each line is fitted with three Gaussian components. For one star (Gaia DR3 2102849596247412480) the H-alpha fit is unconstrained in the coadd and only H-beta values are given. B_split is the linear-Zeeman field implied by the separation of the two outer components (method in [METHODS.md](../METHODS.md#methods)).
 
 The overview shows H-alpha of the six spectra with the highest S/N; red lines mark the fitted component centres.
 
@@ -42,7 +42,10 @@ One figure per star (H-alpha and H-beta):
 | 3327361677328480256 | Gaia DR3 3327361677328480256 | 3.57 | 3.65 | 15.3 | [png](../figures/zeeman/3327361677328480256.png) |
 | 4679463733391272448 | GALEX J040038.6-615458 | 4.28 | 4.22 | 13.2 | [png](../figures/zeeman/4679463733391272448.png) |
 | 3290180587821828480 | GALEX J050006.8+080244 | 5.3 | 5.1 | 10.3 | [png](../figures/zeeman/3290180587821828480.png) |
+| 2102849596247412480 | Gaia DR3 2102849596247412480 | not fitted | 2.14 | 21.9 | [png](../figures/zeeman/2102849596247412480.png) |
 
-Consistency between the two lines: for 27 of the 30 stars the H-alpha and H-beta fields agree to within 1 MG. For three (Gaia DR3 375892788968158848, 5665371272869153152 and 5848754492268362624) the H-beta fit gives a field 1.2 to 5 MG below the H-alpha value, with the H-beta sigma components far closer to the central component than the H-alpha field requires; the field of these three is not established and they are marked as inconsistent in the index. The formal errors in the table come from the line-centre fits alone: 10 of the 30 stars differ between the two lines by more than three formal sigma, so the real uncertainty of a single-line field is a few tenths of a MG, not the tabulated hundredths.
+Consistency between the two lines: for 27 of the 30 stars with both lines fitted the H-alpha and H-beta fields agree to within 1 MG. For three (Gaia DR3 375892788968158848, 5665371272869153152 and 5848754492268362624) the H-beta fit gives a field 1.2 to 5 MG below the H-alpha value, with the H-beta sigma components far closer to the central component than the H-alpha field requires; the field of these three is not established and they are marked as inconsistent in the index. The formal errors in the table come from the line-centre fits alone: 10 of the 30 stars differ between the two lines by more than three formal sigma, so the real uncertainty of a single-line field is a few tenths of a MG, not the tabulated hundredths.
+
+The 31st star (Gaia DR3 2102849596247412480) is H-beta only: its H-alpha fit is unconstrained, and it is neither counted as consistent nor as inconsistent.
 
 Context: GALEX J231613.4-552927 (Gaia DR3 6499095244738784128) is listed by Rebassa-Mansergas et al. (2019) as an infrared-excess white dwarf with a disk-type SED (10,250 K, 0.81 Msun). Madurga Favieres et al. (2024, A&A 688, A168) find no excess in CatWISE (W1 16.49 against a model 16.52).

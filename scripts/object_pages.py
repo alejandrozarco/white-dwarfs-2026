@@ -156,12 +156,16 @@ for _, r in d.iterrows():
 d = T("magnetic_zeeman.csv")
 for _, r in d.iterrows():
     desc = f"DA white dwarf, G = {r.G}; catalogued: {cat(r, ('snowwhite_class', 'SnowWhite'), ('simbad_type', 'SIMBAD'), ('mwdd_spectype', 'MWDD'))}." + (f" {r.note[0].upper() + r.note[1:]}{'' if r.note.endswith('.') else '.'}" if r.note else "")
-    obs = (f"Zeeman-split Balmer lines: B = {r.B_split_Ha_MG} ± {r.e_B_split_Ha_MG} MG (H-alpha), "
-           f"{r.B_split_Hb_MG} ± {r.e_B_split_Hb_MG} MG (H-beta); spectrum S/N {r.snr}")
-    inconsistent = abs(float(r.B_split_Ha_MG) - float(r.B_split_Hb_MG)) > 1.0
+    hb_only = r.B_split_Ha_MG == ""
+    if hb_only:
+        obs = f"Zeeman-split Balmer lines: B = {r.B_split_Hb_MG} ± {r.e_B_split_Hb_MG} MG (H-beta only; H-alpha fit unconstrained); spectrum S/N {r.snr}"
+    else:
+        obs = (f"Zeeman-split Balmer lines: B = {r.B_split_Ha_MG} ± {r.e_B_split_Ha_MG} MG (H-alpha), "
+               f"{r.B_split_Hb_MG} ± {r.e_B_split_Hb_MG} MG (H-beta); spectrum S/N {r.snr}")
+    inconsistent = (not hb_only) and abs(float(r.B_split_Ha_MG) - float(r.B_split_Hb_MG)) > 1.0
     if inconsistent: obs += "; the two lines disagree by more than 1 MG, so the field is not established"
     add(r.gaia_dr3, r["name"], Entry("zeeman", "Zeeman splitting", "zeeman.md", desc, obs,
-        f"B = {r.B_split_Ha_MG} MG (H-alpha) vs {r.B_split_Hb_MG} MG (H-beta): inconsistent" if inconsistent else f"B = {r.B_split_Ha_MG} MG",
+        f"B = {r.B_split_Ha_MG} MG (H-alpha) vs {r.B_split_Hb_MG} MG (H-beta): inconsistent" if inconsistent else (f"B = {r.B_split_Hb_MG} MG (H-beta only)" if hb_only else f"B = {r.B_split_Ha_MG} MG"),
         ["magnetic_zeeman.csv"], None, ["zeeman_split.py"], None))
 
 # TESS amplitude spectra (ZZ Ceti candidates).
@@ -272,7 +276,7 @@ MARK = {
     "2908195134345338496": 2, "4729763229265811328": 2, "6472153670805656832": 2,
     "2002597083798483200": 2, "1977447164064222976": 2,
     "1415911839725510528": 2, "2311285729210966144": 2, "3365371721281530880": 2,
-    "5660016586818424832": 2, "6499095244738784128": 2, "4307667617377160704": 2, "5680077137810906624": 2,
+    "2102849596247412480": 2, "5660016586818424832": 2, "6499095244738784128": 2, "4307667617377160704": 2, "5680077137810906624": 2,
     "4198738558061020928": 2, "5807585134758743040": 2, "2883030508640778752": 2, "6412133010376770560": 2,
     "6430762242043644032": 2, "5848754492268362624": 2, "428300220431345536": 2, "4241409569220727424": 2,
     "50526755482496000": 2, "1199447137276626048": 2, "4236646794083461120": 2, "2833867392391927936": 2,
