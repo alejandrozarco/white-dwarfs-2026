@@ -1,0 +1,13 @@
+test,sample,n_visits_min,n,n_flagged,fraction,note
+p_ZA < 1e-4,hydrogen group (DA classes),2,18092,172,0.0095,
+p_ZA < 1e-4,helium group (DB classes and DO),2,300,2,0.0067,
+p_ZA < 1e-4,mixed group (DAB; DBA; DA/DB),2,116,0,0.0,
+p_ZA < 1e-4,DC,2,277,5,0.0181,
+p_ZA < 1e-4,hydrogen group (DA classes),3,5543,94,0.017,
+p_ZA < 1e-4,helium group (DB classes and DO),3,103,2,0.0194,
+p_ZA < 1e-4,mixed group (DAB; DBA; DA/DB),3,39,0,0.0,
+p_ZA < 1e-4,DC,3,92,2,0.0217,
+|delta Z_A| > 3,visit pairs of one object on the same night,,89,0,0.0,robust width of delta Z_A 0.85 (tables/line_variability_sameday_pairs.csv)
+|delta Z_A| > 3,consecutive visit pairs on different nights,,33137,,0.013,robust width 0.97; normal expectation 0.0027
+p < 1e-4 (delta Z_A),consecutive visit pairs on different nights,,33137,,0.0053,normal expectation 0.0001
+visit S/N consistency cut,in_stack visits with a G magnitude,,65844,1335,0.0203,dropped: more than 2x above or 3x below the per-telescope S/N model

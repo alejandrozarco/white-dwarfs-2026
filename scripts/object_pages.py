@@ -217,6 +217,45 @@ for gaia, g in d[d.role == "target"].groupby("gaia_dr3", sort=False):
         "DAO (He II 4686 + Balmer); " + ("Teff not constrained" if gaia in TEFF_NOT_CONSTRAINED else f"Teff {he.teff_kK:g} kK (He-only TMAP fit" + (f", {he.teff_min_kK:g}-{he.teff_max_kK:g}" if he.teff_min_kK != he.teff_max_kK else "") + ")"),
         ["hot_white_dwarfs.csv"], None, ["hot_white_dwarfs.py"], None))
 
+# Hydrogen and helium line strengths that change between visits.
+d = T("line_variability.csv"); ew = T("line_variability_3074374016095070464.csv")
+for _, r in d.iterrows():
+    v = ew[ew.dataset.str.startswith("SDSS-V") & (ew.used == "True")]
+    desc = (f"White dwarf, G = {r.G}, M_G = {r.M_G}; catalogued: SnowWhite {r.snowwhite_class} ({float(r.snowwhite_teff) / 1000:.1f} kK); SIMBAD {r.simbad_type}; "
+            f"MWDD {r.mwdd_spectype}; DESI DR1 {r.desi_dr1_class_swan} (Swan et al. 2026).")
+    obs = (f"Candidate double-faced white dwarf. EW(H-beta) " + " / ".join(f"{x.ew_Hb} ± {x.e_cal_Hb}" for _, x in v.iterrows()) + " A and EW(He I 4471) "
+           + " / ".join(f"{x.ew_He4471} ± {x.e_cal_He4471}" for _, x in v.iterrows()) + f" A in the SDSS-V visits of MJD " + "/".join(str(int(float(x.mjd))) for _, x in v.iterrows())
+           + f" (p_ZA = {float(r.p_ZA):.1e}, p_ZH = {float(r.p_ZH):.1e}, p_ZHe = {float(r.p_ZHe):.2g}); ZTF P = {float(r.period_h):.5f} ± {float(r.e_period_h):.5f} h, "
+           f"semi-amplitude {pct(r.semi_amplitude_frac, 2)}, false-alarm probability {float(r.ztf_joint_fap):.1e}")
+    add(r.gaia_dr3, r["name"], Entry("line_variability", "Hydrogen and helium line strengths that change between visits", "line_variability.md", desc, obs,
+        f"**candidate double-faced: H-beta EW {v.ew_Hb.iloc[0]}-{v.ew_Hb.iloc[-1]} A, He I anticorrelated; P = {float(r.period_h):.4f} h (ZTF)**",
+        ["line_variability.csv", f"line_variability_{r.gaia_dr3}.csv"], None, ["line_variability.py"], None))
+
+# Magnetic field strength changing between visits.
+d = T("field_variability.csv"); fv = T("field_variability_visits.csv")
+for _, r in d.iterrows():
+    g = fv[fv.gaia_dr3 == r.gaia_dr3]
+    desc = (f"Magnetic white dwarf, G = {r.G}, M_G = {r.M_G}; catalogued: SIMBAD {r.simbad_type}; MWDD {r.mwdd_spectype}"
+            + (f"; DESI DR1 {r.desi_dr1_class_swan} (Swan et al. 2026)" if r.desi_dr1_class_swan else "") + "."
+            + (f" Published TESS period {r.published_period_h} ± {r.e_published_period_h} h ({r.published_period_reference})." if r.published_period_h else ""))
+    obs = (f"Mean Zeeman field per SDSS-V visit (MJD: MG) " + "; ".join(f"{x.mjd}: {x.B_mean_MG}" for _, x in g.iterrows())
+           + f"; change between the extreme visits {float(r.dB_Ha_MG):.2f} MG (H-alpha) and {float(r.dB_Hb_MG):.2f} MG (H-beta); "
+           f"ZTF g P = {float(r.ztf_g_period_h):.4f} h (false-alarm probability {float(r.ztf_g_fap):.2g}), ZTF r P = {float(r.ztf_r_period_h):.4f} h ({float(r.ztf_r_fap):.2g})")
+    add(r.gaia_dr3, r["name"], Entry("field_variability", "Magnetic field strength changing between visits", "field_variability.md", desc, obs,
+        f"**B = {float(r.B_min_MG):.2f}-{float(r.B_max_MG):.2f} MG between visits**", ["field_variability.csv", "field_variability_visits.csv"], None, ["field_variability.py"], None))
+
+# Radial-velocity variable DA white dwarfs.
+d = T("rv_variable_da.csv"); rv = T("rv_variable_da_velocities.csv")
+for _, r in d.iterrows():
+    st = rv[(rv.gaia_dr3 == r.gaia_dr3) & rv.route.str.startswith("SDSS-V")]; bo = rv[(rv.gaia_dr3 == r.gaia_dr3) & (rv.route == "BOSS exposure") & (rv.v != "")]
+    gf = f"GF21 H-atmosphere {float(r.gf21_teff_H) / 1000:.1f} kK, log g {r.gf21_logg_H}, {r.gf21_mass_H} Msun" if r.gf21_teff_H else f"no GF21 H-atmosphere solution (Pwd {r.gf21_pwd})"
+    desc = f"DA white dwarf, G = {r.G}, M_G = {r.M_G}; {gf}." + (" Photometric extremely-low-mass candidate in Pelisoli & Vos (2019)." if r.pelisoli_vos_2019_elm_candidate == "yes" else "")
+    obs = (f"SDSS-V visit velocities (MJD: km/s) " + "; ".join(f"{int(float(x.mjd))}: {float(x.v):+.0f} ± {float(x.e):.0f}" for _, x in st.iterrows())
+           + "; BOSS exposures " + "; ".join(f"{float(x.mjd_mid_tai):.2f}: {float(x.v):+.0f} ± {float(x.e):.0f}" for _, x in bo.iterrows())
+           + f"; change {float(r.store_dv_pair):.0f} km/s ({float(r.store_sig_pair):.1f} sigma); no period known")
+    add(r.gaia_dr3, r["name"], Entry("rv_variable_da", "Radial-velocity variable DA white dwarfs (double white dwarf candidates)", "rv_variable_da.md", desc, obs,
+        f"**velocity change {float(r.store_dv_pair):.0f} km/s in 1 d**", ["rv_variable_da.csv", "rv_variable_da_velocities.csv"], None, ["rv_variable_da.py"], None))
+
 # Write the object pages.
 PAGE_LEAD = {
     "2249098833310553728": "A catalogued but unclassified 63.7-minute variable: a coherent modulation on an over-luminous "
@@ -226,7 +265,7 @@ PAGE_LEAD = {
     "measurement (a red source 3.7 arcsec away dominates WISE) exist, so the companion's nature is open.",
 }
 ORDER = ["gas_discs", "carbon", "zeeman", "periodic", "zz_ceti", "eclipse_and_emission", "hot_white_dwarfs",
-         "irradiated_companions", "hot_wd_periods", "dae_wd_periods"]
+         "irradiated_companions", "hot_wd_periods", "dae_wd_periods", "line_variability", "field_variability", "rv_variable_da"]
 for gaia, o in objects.items():
     name = o["name"] or f"Gaia DR3 {gaia}"
     head = name if gaia in name else f"{name} (Gaia DR3 {gaia})"
@@ -253,7 +292,9 @@ TITLES = {"gas_discs": "Ca II triplet emission (gaseous discs)", "carbon": "Carb
           "periodic": "Photometric periods", "zz_ceti": "TESS amplitude spectra (pulsation candidates)",
           "eclipse_and_emission": "Eclipse and Balmer emission", "hot_white_dwarfs": "Hot white dwarfs with He II lines",
           "irradiated_companions": "Short-period white dwarfs with irradiated companions",
-          "hot_wd_periods": "Day-scale periods of hot white dwarfs", "dae_wd_periods": "Periods of DA white dwarfs with emission lines"}
+          "hot_wd_periods": "Day-scale periods of hot white dwarfs", "dae_wd_periods": "Periods of DA white dwarfs with emission lines",
+          "line_variability": "Hydrogen and helium line strengths that change between visits", "field_variability": "Magnetic field strength changing between visits",
+          "rv_variable_da": "Radial-velocity variable DA white dwarfs (double white dwarf candidates)"}
 MARK = {
     "4851800979770492544": 4, "6722639595190126208": 4, "3161618477052648192": 3, "4996506979251027584": 3, "303768056000635776": 3, "5467851842959399808": 3, "6177529630243170432": 3, "2482810406432480512": 3,
     "2249098833310553728": 5,

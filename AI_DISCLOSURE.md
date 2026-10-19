@@ -9,7 +9,8 @@ reviewed them.
 
 **What this means for use.**
 - Every table and figure is recomputed from public data by the scripts in `scripts/`; see `README.md`, "Reproduction",
-  and `METHODS.md`.
+  and `METHODS.md`. The exceptions are the screen summary tables and calibration inputs listed in `METHODS.md`, which are
+  exported from screens of all SDSS-V DR20 visit spectra run outside this repository.
 - The measurements, and the labels marking measurements as not found in earlier catalogues or literature, are the
   output of an AI-run analysis, not of a peer-reviewed study. Treat them as leads to be checked independently.
 - Credit for confirming, refining or refuting any measurement belongs to whoever does that work.

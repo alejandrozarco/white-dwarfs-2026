@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use these measurements, please cite them as below. Not peer reviewed; see AI_DISCLOSURE.md."
+type: dataset
+title: "White dwarfs 2026: measurements"
+authors:
+  - family-names: Zarco
+    given-names: A.
+# Placeholder: replace with the DOI of the Zenodo deposit.
+doi: 10.5281/zenodo.0000000
+repository-code: "https://github.com/alejandrozarco/white-dwarfs-2026"
+license: CC-BY-4.0
+date-released: 2026-10-19
+keywords:
+  - white dwarfs
+  - SDSS-V
+  - spectroscopy
+  - photometric variability

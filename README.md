@@ -6,7 +6,7 @@
 > credit for confirming, refining or refuting any of them belongs to whoever does that work. Questions, checks
 > and corrections: [GitHub issues](https://github.com/alejandrozarco/white-dwarfs-2026/issues).
 
-Measurements of white dwarfs from public SDSS-V DR20 spectra (Astra 0.8.1), with DESI DR1, SDSS/BOSS, ESO X-shooter, TESS, HST/COS, GALEX, ATLAS, ZTF and Gaia DR3 epoch photometry. Each table gives the measured quantities with existing SIMBAD, MWDD (snapshot 2026-08-05) and SDSS-V SnowWhite classifications. The scripts in `scripts/` download the public data and recompute every table and figure. Data were retrieved 2026-09-23 to 2026-09-27. Methods are in [METHODS.md](METHODS.md).
+Measurements of white dwarfs from public SDSS-V DR20 spectra (Astra 0.8.1), with DESI DR1, SDSS/BOSS, ESO X-shooter, TESS, HST/COS, GALEX, ATLAS, ZTF and Gaia DR3 epoch photometry. Each table gives the measured quantities with existing SIMBAD, MWDD (snapshot 2026-08-05) and SDSS-V SnowWhite classifications. The scripts in `scripts/` download the public data and recompute every table and figure, except the screen summary tables listed at the end of METHODS.md. Data were retrieved 2026-09-23 to 2026-09-27 and on 2026-10-18 and 2026-10-19. Methods are in [METHODS.md](METHODS.md).
 
 ## Topics
 
@@ -15,13 +15,16 @@ Measurements of white dwarfs from public SDSS-V DR20 spectra (Astra 0.8.1), with
 | Ca II triplet emission (gaseous discs) | [docs/gas_discs.md](docs/gas_discs.md) | `gas_disc_white_dwarfs.csv`, `gas_disc_epochs_*.csv`, `gas_disc_screen.csv`, `desi_gas_disc_screen.csv` | 6 |
 | Carbon lines | [docs/carbon.md](docs/carbon.md) | `carbon_white_dwarfs.csv`, `carbon_screen.csv`, `carbon_*_features.csv` | 9 |
 | Zeeman splitting | [docs/zeeman.md](docs/zeeman.md) | `magnetic_zeeman.csv` | 32 |
-| Photometric periods | [docs/periodic.md](docs/periodic.md) | `periodic_6021870154194477312.csv`, `periodic_white_dwarfs.csv`, `reflection_3107374277060584064*.csv`, `tess_ffi_*.csv` | 18 |
+| Photometric periods | [docs/periodic.md](docs/periodic.md) | `periodic_6021870154194477312.csv`, `periodic_white_dwarfs.csv`, `reflection_3107374277060584064*.csv`, `tess_ffi_*.csv` | 20 |
 | TESS amplitude spectra | [docs/zz_ceti.md](docs/zz_ceti.md) | `zz_ceti_objects.csv`, `zz_ceti_tess_sectors.csv` | 5 |
-| Eclipse and Balmer emission | [docs/eclipse_and_emission.md](docs/eclipse_and_emission.md) | `eclipsing_4731701084150029824.csv`, `balmer_emission.csv` | 3 |
+| Eclipse and Balmer emission | [docs/eclipse_and_emission.md](docs/eclipse_and_emission.md) | `eclipsing_4731701084150029824.csv`, `eclipsing_4851800979770492544*.csv`, `balmer_emission.csv` | 4 |
 | Hot white dwarfs with He II lines | [docs/hot_white_dwarfs.md](docs/hot_white_dwarfs.md) | `hot_white_dwarfs.csv` | 6 |
-| Short-period white dwarfs with irradiated companions | [docs/irradiated_companions.md](docs/irradiated_companions.md) | `irradiated_companions.csv`, `irradiated_companions_periods.csv`, `desi_halpha_6914922055508553984.csv` | 6 |
+| Short-period white dwarfs with irradiated companions | [docs/irradiated_companions.md](docs/irradiated_companions.md) | `irradiated_companions.csv`, `irradiated_companions_periods.csv`, `desi_halpha_6914922055508553984.csv` | 11 |
 | Day-scale periods of hot white dwarfs | [docs/hot_wd_periods.md](docs/hot_wd_periods.md) | `hot_wd_periods.csv` | 9 |
 | Periods of DA white dwarfs with emission lines | [docs/dae_wd_periods.md](docs/dae_wd_periods.md) | `dae_wd_periods.csv` | 7 |
+| Hydrogen and helium line strengths that change between visits | [docs/line_variability.md](docs/line_variability.md) | `line_variability.csv`, `line_variability_3074374016095070464.csv`, `line_variability_screen.csv`, `line_variability_injection.csv`, `line_variability_dadb_controls.csv`, `line_variability_sameday_pairs.csv` | 1 |
+| Magnetic field strength changing between visits | [docs/field_variability.md](docs/field_variability.md) | `field_variability.csv`, `field_variability_visits.csv` | 2 |
+| Radial-velocity variable DA white dwarfs (double white dwarf candidates) | [docs/rv_variable_da.md](docs/rv_variable_da.md) | `rv_variable_da.csv`, `rv_variable_da_velocities.csv`, `rv_variable_da_injection.csv`, `rv_variable_da_null.csv`, `rv_variable_da_dr19_recovery.csv` | 4 |
 
 ## Objects
 
@@ -186,6 +189,28 @@ One page per object with the measurement and its supporting data (tables, input 
 | [WDJ214656.86+143125.17](docs/objects/1769157090045264128.md) \*\* | DESI DR1 class DAE; GF21 16.0 kK, 0.24 Msun; W1, W2 excess 1.9, 1.6 mag. G = 19.45, 1010 pc. Spectroscopic fit 40,446 K, log g 7.85 (Kilic et al. 2026). Swan et al. (2026) list the same ZTF period (0.2846190 d). | P = 6.83088 h, 3.9% (ZTF) |
 | [WDJ083531.69+315503.31](docs/objects/709815329316284928.md) \*\* | DESI DR1 class DAE; GF21 13.2 kK, 0.25 Msun; W1, W2 excess 2.1, 2.4 mag. G = 19.26, 742 pc. Spectroscopic fit 32,873 K, log g 8.08 (Bédard et al. 2020). Swan et al. (2026) list the same ZTF period (0.184333083 d). | P = 4.42399 h, 4.9% (ZTF) |
 | [WDJ075449.34+442357.52](docs/objects/926161868627454976.md) \*\*\* | DESI DR1 class DAe; GF21 18.9 kK, 0.21 Msun; W1, W2 excess 2.2, 2.9 mag. G = 19.40, 1449 pc. Spectroscopic fit 32,019 K, log g 7.22 (Kilic et al. 2026). | **P = 3.82105 h, 3.9% (ZTF)** |
+
+### Hydrogen and helium line strengths that change between visits (1)
+
+| object | description | measurement |
+|---|---|---|
+| [GALEX J085307.3-002204](docs/objects/3074374016095070464.md) | White dwarf, G = 18.798, M_G = 11.01; catalogued: SnowWhite DA (36.9 kK); SIMBAD WD* DAB; MWDD DA; DESI DR1 DA (Swan et al. 2026). | **candidate double-faced: H-beta EW 6.52-11.2 A, He I anticorrelated; P = 5.8879 h (ZTF)** |
+
+### Magnetic field strength changing between visits (2)
+
+| object | description | measurement |
+|---|---|---|
+| [PB 8995](docs/objects/2492691408193400576.md) | Magnetic white dwarf, G = 16.931, M_G = 11.13; catalogued: SIMBAD WD* DAH; MWDD DAH. | **B = 2.80-4.61 MG between visits** |
+| [GALEX J091511.2-045730](docs/objects/5758736375755925760.md) | Magnetic white dwarf, G = 16.39, M_G = 8.16; catalogued: SIMBAD WD* DA; MWDD DAH; DESI DR1 DAH (Swan et al. 2026). Published TESS period 11.468 ± 0.007 h (Oliveira da Rosa et al. 2024). | **B = 7.49-8.94 MG between visits** |
+
+### Radial-velocity variable DA white dwarfs (double white dwarf candidates) (4)
+
+| object | description | measurement |
+|---|---|---|
+| [WDJ213747.45+212116.76](docs/objects/1793649261310724224.md) | DA white dwarf, G = 17.74, M_G = 12.56; GF21 H-atmosphere 7.3 kK, log g 7.47, 0.36 Msun. | **velocity change 215 km/s in 1 d** |
+| [WDJ202507.82+162431.33](docs/objects/1805900191668352384.md) | DA white dwarf, G = 17.86, M_G = 8.25; no GF21 H-atmosphere solution (Pwd 0.21). Photometric extremely-low-mass candidate in Pelisoli & Vos (2019). | **velocity change 152 km/s in 1 d** |
+| [WDJ034434.04-453001.55](docs/objects/4835899632154347520.md) | DA white dwarf, G = 18.88, M_G = 10.07; GF21 H-atmosphere 12.8 kK, log g 6.99, 0.26 Msun. Photometric extremely-low-mass candidate in Pelisoli & Vos (2019). | **velocity change 458 km/s in 1 d** |
+| [WDJ055802.20+282814.84](docs/objects/3431502535327561728.md) | DA white dwarf, G = 18.34, M_G = 9.49; GF21 H-atmosphere 18.4 kK, log g 6.88, 0.26 Msun. Photometric extremely-low-mass candidate in Pelisoli & Vos (2019). | **velocity change 523 km/s in 1 d** |
 <!-- object-index:end -->
 
 <img src="figures/gas_discs/578709631539357440_epochs.png" width="720">
@@ -253,10 +278,13 @@ python ztf_lightcurve.py 578709631539357440 134.841202 4.636784
 python ztf_lightcurve.py 1827014701883095680 299.804316 22.147851
 python ztf_lightcurve.py 2527617665632689024 9.892213 -3.946573
 python ztf_lightcurve.py 1764314497240770176 313.742432 16.179092
+python line_variability.py   # SDSS-V visits, SDSS and DESI spectra (SPARCL) and ZTF period of 3074374016095070464
+python field_variability.py  # per-visit Zeeman fields of 2492691408193400576 and 5758736375755925760
+python rv_variable_da.py     # SDSS-V visits, BOSS spec files (about 10 MB) and SPARCL spectra of four DA white dwarfs
 python figures.py            # all figures; or name one, e.g. python figures.py gas_discs
 python object_pages.py       # object pages and the README object index
 ```
 Arguments for the other TESS light curves and pixel tests are in the table columns (TIC, sector, cadence, frequency).
 
 ## Data sources
-SDSS-V DR20 and SDSS DR17 (including BOSS); DESI DR1 via SPARCL (NOIRLab Astro Data Lab) and the DESI DR1 white-dwarf catalogues (Swan et al. 2026; Amorim et al. 2026); ESO X-shooter phase 3 spectra (programme 115.28GM.001); Legacy Surveys DR10 (Astro Data Lab); Gaia DR3 (ESA/Gaia/DPAC), including epoch photometry (VizieR I/355/epphot), the Gaia Synthetic Photometry Catalogue (VizieR J/A+A/674/A33) and Gentile Fusillo et al. (2021, VizieR J/MNRAS/508/3877); TESS SPOC light curves and full-frame images (TESScut), and HST/COS program 17420 (MAST); CoRoT faint-star light curves (CDS, B/corot); GALEX GUVcat AIS (Bianchi et al. 2017), GALEX GR6/7 (MAST) and the GALEX CAUSE Kepler catalogue (Olmedo et al. 2015); LAMOST DR10; ATLAS forced photometry (Tonry et al. 2018; Shingles et al. 2021); ZTF public data releases (IRSA); CatWISE2020 (Marocco et al. 2021) and VISTA Hemisphere Survey DR5 (VizieR II/365, II/367); Montreal synthetic photometry of pure-H white dwarfs (Holberg & Bergeron 2006; Bédard et al. 2020); DESI DR1 fibre-assignment and redshift tables (Astro Data Lab); NIST Atomic Spectra Database; TMAP H+He model spectra from TheoSSA (GAVO Data Center); Montreal White Dwarf Database; SIMBAD.
+SDSS-V DR20 (Astra 0.8.1 mwmVisit files and BOSS v6_2_1 per-exposure spec files) and SDSS DR17 (including BOSS); DESI DR1 via SPARCL (NOIRLab Astro Data Lab) and the DESI DR1 white-dwarf catalogues (Swan et al. 2026; Amorim et al. 2026); ESO X-shooter phase 3 spectra (programme 115.28GM.001); Legacy Surveys DR10 (Astro Data Lab); Gaia DR3 (ESA/Gaia/DPAC), including epoch photometry (VizieR I/355/epphot), the Gaia Synthetic Photometry Catalogue (VizieR J/A+A/674/A33) and Gentile Fusillo et al. (2021, VizieR J/MNRAS/508/3877); TESS SPOC light curves and full-frame images (TESScut), and HST/COS program 17420 (MAST); CoRoT faint-star light curves (CDS, B/corot); GALEX GUVcat AIS (Bianchi et al. 2017), GALEX GR6/7 (MAST) and the GALEX CAUSE Kepler catalogue (Olmedo et al. 2015); LAMOST DR10; ATLAS forced photometry (Tonry et al. 2018; Shingles et al. 2021); ZTF public data releases (IRSA); CatWISE2020 (Marocco et al. 2021) and VISTA Hemisphere Survey DR5 (VizieR II/365, II/367); Montreal synthetic photometry of pure-H white dwarfs (Holberg & Bergeron 2006; Bédard et al. 2020); DESI DR1 fibre-assignment and redshift tables (Astro Data Lab); NIST Atomic Spectra Database; Pelisoli & Vos (2019, VizieR J/MNRAS/488/2892); TMAP H+He model spectra from TheoSSA (GAVO Data Center); Montreal White Dwarf Database; SIMBAD.

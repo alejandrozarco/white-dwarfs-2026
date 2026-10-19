@@ -572,10 +572,104 @@ def irradiated_companions():
     plt.tight_layout(); plt.savefig(out("irradiated_companions", "6914922055508553984_desi_halpha.png"), dpi=90); plt.close()
 
 
+def _sideband_norm(w, f, iv, lo, hi, sides):
+    m = (w > lo) & (w < hi) & (iv > 0); sm = np.zeros(len(w), bool)
+    for a, b in sides:
+        sm |= (w > a) & (w < b)
+    sm &= iv > 0
+    c = np.polyval(np.polyfit(w[sm], f[sm], 1, w=np.sqrt(iv[sm])), w[m])
+    return w[m], np.convolve(f[m] / c, np.ones(3) / 3, "same")
+
+
+def line_variability():
+    """GALEX J085307.3-002204: H-beta and He I 4471 in every spectrum (offset, phase on the ZTF ephemeris), the equivalent widths
+    against phase, and the ZTF periodogram and folded light curve."""
+    import line_variability as LV
+    t = pd.read_csv(f"{T}/line_variability_{LV.GAIA}.csv"); s = pd.read_csv(f"{T}/line_variability.csv", dtype={"gaia_dr3": str}).iloc[0]
+    sp = [r for r in LV.sdssv_rows() + LV.sparcl_rows() if r["used"] is not False]
+    fig, ax = plt.subplots(2, 3, figsize=(12, 7))
+    for k, r in enumerate(sorted(sp, key=lambda r: r["mjd"])):
+        x = t[t.identifier == r["identifier"]].iloc[0]; lab = f"{r['dataset'].replace(' visit', '')} {int(r['mjd'])}, phase {x.phase_start:.2f}"
+        for a, (lo, hi, sides, l0) in zip(ax[0, :2], ((4760, 4980, [(4780, 4828), (4960, 4995)], 4862.68), (4400, 4545, [(4410, 4440), (4500, 4540)], 4472.7))):
+            w, y = _sideband_norm(r["_w"], r["_f"], r["_iv"], lo, hi, sides); a.plot(w, y - 0.25 * k, lw=0.7, color=f"C{k}")
+            a.text(hi, 1 - 0.25 * k, " " + lab, fontsize=6, va="center", color=f"C{k}"); a.axvline(l0, color="0.6", lw=0.5, ls=":"); a.set_xlim(lo, hi + 0.55 * (hi - lo))
+    ax[0, 0].set_title("H-beta (linear sideband continuum, 3-pixel smoothing)", fontsize=8); ax[0, 1].set_title("He I 4471", fontsize=8)
+    for a in ax[0, :2]:
+        a.set_xlabel("vacuum wavelength (A)"); a.set_yticks([])
+    for a, n, lab in ((ax[1, 0], "Hb", "EW(H-beta) (A)"), (ax[1, 1], "He4471", "EW(He I 4471) (A)")):
+        for k, (_, x) in enumerate(t[t.used != False].sort_values("mjd").iterrows()):
+            e = x[f"e_cal_{n}"] if np.isfinite(x[f"e_cal_{n}"]) else x[f"e_{n}"]; ph = x.phase_start if not np.isfinite(x.phase_end) else (x.phase_start + x.phase_end) / 2
+            xe = None if not np.isfinite(x.phase_end) else [[ph - x.phase_start], [x.phase_end - ph]]
+            for q in (0, 1):
+                a.errorbar(ph + q, x[f"ew_{n}"], e, xerr=xe, fmt="o", ms=4, color=f"C{k}")
+        a.set_xlabel("ZTF phase (0 = flux maximum); bars: visit duration"); a.set_ylabel(lab); a.set_xlim(0, 2)
+    T_, F_, E_, B_, _ = LV.ztf_series(os.path.join("..", "data", f"ztf_{LV.GAIA}.csv")); fr = np.linspace(0.1, 50, 200000)
+    ax[0, 2].plot(fr, LombScargle(T_, F_, E_).power(fr), "k", lw=0.4); ax[0, 2].axvline(s.frequency_cd, color="r", lw=0.6, alpha=0.5)
+    ax[0, 2].set_xlabel("frequency (c/d)"); ax[0, 2].set_ylabel("Lomb-Scargle power (ZTF g + r)"); ax[0, 2].set_xlim(0, 12)
+    ax[0, 2].set_title(f"P = {s.period_h:.5f} h, FAP {s.ztf_joint_fap:.1e}", fontsize=8)
+    edges = np.linspace(0, 1, 21); c = (edges[1:] + edges[:-1]) / 2; p = ((T_ - s.t_max_bjd) * s.frequency_cd) % 1
+    for b, col in (("zg", "C2"), ("zr", "C3")):
+        sel = B_ == b; mb = [np.average(F_[sel][(p[sel] >= lo) & (p[sel] < hi)] - 1, weights=1 / E_[sel][(p[sel] >= lo) & (p[sel] < hi)] ** 2) for lo, hi in zip(edges[:-1], edges[1:])]
+        sb = [1 / np.sqrt(np.sum(1 / E_[sel][(p[sel] >= lo) & (p[sel] < hi)] ** 2)) for lo, hi in zip(edges[:-1], edges[1:])]
+        for q in (0, 1):
+            ax[1, 2].errorbar(c + q, mb, sb, fmt="o", ms=3, color=col, label=f"ZTF {b[1]} (20 bins)" if q == 0 else None)
+    ax[1, 2].set_xlabel("phase (0 = flux maximum)"); ax[1, 2].set_ylabel("fractional flux"); ax[1, 2].legend(fontsize=7)
+    fig.suptitle(f"Gaia DR3 {LV.GAIA} ({s['name']}): SDSS-V DR20 visits, BOSS DR17 and DESI DR1 spectra; ZTF ephemeris t_max = BJD_TDB {s.t_max_bjd:.4f}", fontsize=8)
+    plt.tight_layout(); plt.savefig(out("line_variability", f"{LV.GAIA}.png"), dpi=90); plt.close()
+
+
+def field_variability():
+    """PB 8995 and GALEX J091511.2-045730: H-alpha in each SDSS-V visit with the fitted sigma-component positions, and the per-visit
+    fields of both lines against time."""
+    from zeeman_split import K
+    t = pd.read_csv(f"{T}/field_variability_visits.csv", dtype={"gaia_dr3": str}); o = pd.read_csv(f"{T}/field_variability.csv", dtype={"gaia_dr3": str, "sdss_id": str})
+    for _, s in o.iterrows():
+        g = t[t.gaia_dr3 == s.gaia_dr3].sort_values("mjd"); vs = {x["mjd"]: x for x in visits(s.sdss_id) if x["in_stack"]}
+        fig, ax = plt.subplots(1, 2, figsize=(11, 1.6 + 0.55 * len(g)), gridspec_kw=dict(width_ratios=[1.4, 1]))
+        for k, (_, r) in enumerate(g.iterrows()):
+            v = vs[int(r.mjd)]; m = (v["wave"] > 6250) & (v["wave"] < 6880) & (v["ivar"] > 0); y = gaussian_filter1d(v["flux"][m], 1.5); y = y / np.median(y[(v["wave"][m] < 6350) | (v["wave"][m] > 6800)])
+            col = "C3" if r.B_mean_MG > s.B_mean_MG else "C0"; ax[0].plot(v["wave"][m], y - 0.35 * k, lw=0.7, color=col)
+            for sgn in (-1, 1):
+                ax[0].plot([6564.61 + sgn * r.B_Ha_MG * K["Ha"]] * 2, [1.08 - 0.35 * k, 1.16 - 0.35 * k], color=col, lw=1)
+            ax[0].text(6885, 1 - 0.35 * k, f" MJD {int(r.mjd)}: {r.B_Ha_MG:.2f} MG", fontsize=6, va="center", color=col)
+        ax[0].axvline(6564.61, color="0.6", lw=0.5, ls=":"); ax[0].set_xlim(6250, 7010); ax[0].set_yticks([]); ax[0].set_xlabel("vacuum wavelength (A)")
+        ax[0].set_title("H-alpha per visit (ticks: fitted outer components)", fontsize=8)
+        for ln, col, off in (("Ha", "C1", -0.15), ("Hb", "C4", 0.15)):
+            ax[1].errorbar(np.arange(len(g)) + off, g[f"B_{ln}_MG"], g[f"e_B_{ln}_MG"] * s.error_inflation, fmt="o", ms=4, color=col, label=f"{'H-alpha' if ln == 'Ha' else 'H-beta'}")
+        ax[1].set_xticks(np.arange(len(g))); ax[1].set_xticklabels([str(int(x)) for x in g.mjd], rotation=60, fontsize=7); ax[1].set_xlabel("visit MJD")
+        ax[1].set_ylabel("B (MG)"); ax[1].legend(fontsize=7); ax[1].set_title(f"errors x {s.error_inflation:.2f} (H-alpha/H-beta scatter)", fontsize=8)
+        fig.suptitle(f"Gaia DR3 {s.gaia_dr3} ({s['name']}), SDSS-V DR20 visits", fontsize=8)
+        plt.tight_layout(); plt.savefig(out("field_variability", f"{s.gaia_dr3}.png"), dpi=90); plt.close()
+
+
+def rv_variable_da():
+    """Balmer line profiles of each SDSS-V visit in velocity (normalised by a linear continuum outside +-3300 km/s, 2-pixel
+    smoothing), with the visit velocities from rv_variable_da.py."""
+    import rv_variable_da as RV
+    t = pd.read_csv(f"{T}/rv_variable_da_velocities.csv", dtype={"gaia_dr3": str}); o = pd.read_csv(f"{T}/rv_variable_da.csv", dtype={"gaia_dr3": str, "sdss_id": str})
+    for _, s in o.iterrows():
+        g = t[(t.gaia_dr3 == s.gaia_dr3) & t.route.str.startswith("SDSS-V")].sort_values("mjd"); vs = {x["mjd"]: x for x in visits(s.sdss_id) if x["in_stack"]}
+        fig, ax = plt.subplots(1, 4, figsize=(12, 3.2))
+        for k, (_, r) in enumerate(g.iterrows()):
+            W = RV.windows(vs[int(r.mjd)]["wave"], vs[int(r.mjd)]["flux"], vs[int(r.mjd)]["ivar"]); col = f"C{3 * k}"
+            for a, L, nm in zip(ax, RV.LN, ("H-alpha", "H-beta", "H-gamma", "H-delta")):
+                x, f, iv = W[L]; q = RV.norm_spec(x, f, iv)
+                if q is None:
+                    continue
+                m = (np.abs(x) < 2500) & (q[1] > 0); a.plot(x[m], gaussian_filter1d(q[0][m], 2), color=col, lw=0.8, label=f"MJD {int(r.mjd)}: {r.v:+.0f} +- {r.e:.0f} km/s" if L == "Ha" else None)
+                if np.isfinite(r.v):
+                    a.axvline(r.v, color=col, lw=0.7, ls="--")
+                a.set_title(nm, fontsize=8); a.set_xlabel("velocity (km/s)"); a.set_xlim(-2500, 2500)
+        ax[0].legend(fontsize=6, loc="lower left"); ax[0].set_ylabel("normalised flux")
+        fig.suptitle(f"Gaia DR3 {s.gaia_dr3} ({s['name']}), SDSS-V DR20 visits (XCSAO shift removed); dashed: visit velocities", fontsize=8)
+        plt.tight_layout(); plt.savefig(out("rv_variable_da", f"{s.gaia_dr3}.png"), dpi=90); plt.close()
+
+
 if __name__ == "__main__":
     import sys
     ALL = dict(zeeman=zeeman, carbon_optical=carbon_optical, carbon_screen_spectra=carbon_screen_spectra, carbon_cos=carbon_cos, galex=galex,
                eclipse=eclipse, eclipse_4851800979770492544=eclipse_4851800979770492544, balmer=balmer, zz=zz, periodic=periodic, periodic_white_dwarfs=periodic_white_dwarfs,
-               hot_dq_comparison=hot_dq_comparison, hot_dq_comparison_sdssv=lambda: hot_dq_comparison(extra=True), gas_discs=gas_discs, gas_discs_narrow=gas_discs_narrow, gas_discs_desi=gas_discs_desi, reflection=reflection, hot_white_dwarfs=hot_white_dwarfs, irradiated_companions=irradiated_companions, hot_dae_wd_periods=hot_dae_wd_periods)
+               hot_dq_comparison=hot_dq_comparison, hot_dq_comparison_sdssv=lambda: hot_dq_comparison(extra=True), gas_discs=gas_discs, gas_discs_narrow=gas_discs_narrow, gas_discs_desi=gas_discs_desi, reflection=reflection, hot_white_dwarfs=hot_white_dwarfs, irradiated_companions=irradiated_companions, hot_dae_wd_periods=hot_dae_wd_periods,
+               line_variability=line_variability, field_variability=field_variability, rv_variable_da=rv_variable_da)
     for name in (sys.argv[1:] or ALL):
         ALL[name](); print(name, "done", flush=True)

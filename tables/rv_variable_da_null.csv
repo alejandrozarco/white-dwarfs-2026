@@ -1,0 +1,5 @@
+snr_min,n_objects,flagged,flagged_jackknife,n_null_series,null_flagged,null_flagged_jackknife
+5,11287,268,169,9703,17,11
+8,7203,179,117,6651,5,3
+12,4603,119,74,4362,1,0
+15,3517,97,59,3342,0,0

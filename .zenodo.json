@@ -1,0 +1,26 @@
+{
+  "upload_type": "dataset",
+  "title": "White dwarfs 2026: measurements",
+  "creators": [
+    {"name": "Zarco, A."}
+  ],
+  "description": "Measurements of white dwarfs from public SDSS-V DR20 spectra (Astra 0.8.1 visit spectra and BOSS per-exposure spectra), with DESI DR1, SDSS/BOSS, ESO X-shooter, TESS, HST/COS, GALEX, ATLAS, ZTF and Gaia DR3 epoch photometry. Topics: Ca II triplet emission from gaseous discs; carbon lines; Zeeman splitting; photometric periods; TESS amplitude spectra of pulsation candidates; an eclipse and Balmer emission; hot white dwarfs with He II lines; short-period white dwarfs with irradiated companions; day-scale periods of hot white dwarfs; periods of DA white dwarfs with emission lines; hydrogen and helium line strengths that change between visits; magnetic field strength changing between visits; radial-velocity variable DA white dwarfs (double white dwarf candidates). Each topic has a page, measurement tables (CSV), figures and per-object pages, and the scripts download the public data and recompute the per-object tables and figures. Existing SIMBAD, MWDD and SDSS-V SnowWhite classifications are given with the measurements.",
+  "keywords": [
+    "white dwarfs",
+    "SDSS-V",
+    "DESI",
+    "spectroscopy",
+    "photometric variability",
+    "magnetic white dwarfs",
+    "Zeeman splitting",
+    "double white dwarfs",
+    "radial velocities",
+    "gaseous debris discs",
+    "carbon-atmosphere white dwarfs",
+    "ZTF",
+    "TESS",
+    "Gaia DR3"
+  ],
+  "notes": "Not peer reviewed. Produced by AI models under the direction of the repository owner; see AI_DISCLOSURE.md. Tables and figures: CC BY 4.0; code: MIT.",
+  "license": "cc-by-4.0"
+}
