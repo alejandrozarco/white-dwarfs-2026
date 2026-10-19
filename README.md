@@ -6,6 +6,9 @@
 > credit for confirming, refining or refuting any of them belongs to whoever does that work. Questions, checks
 > and corrections: [GitHub issues](https://github.com/alejandrozarco/white-dwarfs-2026/issues).
 
+To refer to this record, please cite the archived repository: Zenodo, [doi:10.5281/zenodo.23463397](https://doi.org/10.5281/zenodo.23463397) (all versions; v1.0: [10.5281/zenodo.23463398](https://doi.org/10.5281/zenodo.23463398)).
+
+
 Measurements of white dwarfs from public SDSS-V DR20 spectra (Astra 0.8.1), with DESI DR1, SDSS/BOSS, ESO X-shooter, TESS, HST/COS, GALEX, ATLAS, ZTF and Gaia DR3 epoch photometry. Each table gives the measured quantities with existing SIMBAD, MWDD (snapshot 2026-08-05) and SDSS-V SnowWhite classifications. The scripts in `scripts/` download the public data and recompute every table and figure, except the screen summary tables listed at the end of METHODS.md. Data were retrieved 2026-09-23 to 2026-09-27 and on 2026-10-18 and 2026-10-19. Methods are in [METHODS.md](METHODS.md).
 
 ## Topics

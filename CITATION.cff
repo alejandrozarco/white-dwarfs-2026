@@ -5,8 +5,7 @@ title: "White dwarfs 2026: measurements"
 authors:
   - family-names: Zarco
     given-names: A.
-# Placeholder: replace with the DOI of the Zenodo deposit.
-doi: 10.5281/zenodo.0000000
+doi: 10.5281/zenodo.23463397
 repository-code: "https://github.com/alejandrozarco/white-dwarfs-2026"
 license: CC-BY-4.0
 date-released: 2026-10-19
