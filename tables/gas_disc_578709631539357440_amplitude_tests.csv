@@ -1,0 +1,65 @@
+spectrum,test,setting,value
+BOSS-DR17 2010-12-05,continuum,"order 1, 8330-8830 A, lines masked +-1100 km/s",-0.097
+BOSS-DR17 2010-12-05,continuum,"order 1, 8330-8830 A, lines masked +-1400 km/s",-0.098
+BOSS-DR17 2010-12-05,continuum,"order 1, 8250-8950 A, lines masked +-1100 km/s",-0.085
+BOSS-DR17 2010-12-05,continuum,"order 1, 8250-8950 A, lines masked +-1400 km/s",-0.084
+BOSS-DR17 2010-12-05,continuum,"order 1, 8380-8780 A, lines masked +-1100 km/s",-0.045
+BOSS-DR17 2010-12-05,continuum,"order 1, 8380-8780 A, lines masked +-1400 km/s",-0.038
+BOSS-DR17 2010-12-05,continuum,"order 2, 8330-8830 A, lines masked +-1100 km/s",0.016
+BOSS-DR17 2010-12-05,continuum,"order 2, 8330-8830 A, lines masked +-1400 km/s",0.051
+BOSS-DR17 2010-12-05,continuum,"order 2, 8250-8950 A, lines masked +-1100 km/s",-0.041
+BOSS-DR17 2010-12-05,continuum,"order 2, 8250-8950 A, lines masked +-1400 km/s",-0.028
+BOSS-DR17 2010-12-05,continuum,"order 2, 8380-8780 A, lines masked +-1100 km/s",0.001
+BOSS-DR17 2010-12-05,continuum,"order 2, 8380-8780 A, lines masked +-1400 km/s",0.029
+BOSS-DR17 2010-12-05,continuum,"order 3, 8330-8830 A, lines masked +-1100 km/s",0.031
+BOSS-DR17 2010-12-05,continuum,"order 3, 8330-8830 A, lines masked +-1400 km/s",0.05
+BOSS-DR17 2010-12-05,continuum,"order 3, 8250-8950 A, lines masked +-1100 km/s",-0.074
+BOSS-DR17 2010-12-05,continuum,"order 3, 8250-8950 A, lines masked +-1400 km/s",-0.074
+BOSS-DR17 2010-12-05,continuum,"order 3, 8380-8780 A, lines masked +-1100 km/s",-0.023
+BOSS-DR17 2010-12-05,continuum,"order 3, 8380-8780 A, lines masked +-1400 km/s",-0.101
+BOSS-DR17 2010-12-05,continuum,"order 4, 8330-8830 A, lines masked +-1100 km/s",0.013
+BOSS-DR17 2010-12-05,continuum,"order 4, 8330-8830 A, lines masked +-1400 km/s",0.026
+BOSS-DR17 2010-12-05,continuum,"order 4, 8250-8950 A, lines masked +-1100 km/s",-0.026
+BOSS-DR17 2010-12-05,continuum,"order 4, 8250-8950 A, lines masked +-1400 km/s",-0.006
+BOSS-DR17 2010-12-05,continuum,"order 4, 8380-8780 A, lines masked +-1100 km/s",0.257
+BOSS-DR17 2010-12-05,continuum,"order 4, 8380-8780 A, lines masked +-1400 km/s",-0.133
+BOSS-DR17 2010-12-05,default,amp_rel_ref +- formal error,0.016 +- 0.093
+BOSS-DR17 2010-12-05,circular-shift null,shifts,340.0
+BOSS-DR17 2010-12-05,circular-shift null,mean,0.056
+BOSS-DR17 2010-12-05,circular-shift null,standard deviation,0.083
+BOSS-DR17 2010-12-05,circular-shift null,95th percentile,0.193
+BOSS-DR17 2010-12-05,circular-shift null,maximum,0.263
+BOSS-DR17 2010-12-05,injection,coadd profile x 0.5 added before normalisation; recovered amplitude,0.517
+BOSS-DR17 2010-12-05,injection,coadd profile x 1.0 added before normalisation; recovered amplitude,1.017
+SDSS-DR17 2003-01-31,continuum,"order 1, 8330-8830 A, lines masked +-1100 km/s",0.344
+SDSS-DR17 2003-01-31,continuum,"order 1, 8330-8830 A, lines masked +-1400 km/s",0.33
+SDSS-DR17 2003-01-31,continuum,"order 1, 8250-8950 A, lines masked +-1100 km/s",0.367
+SDSS-DR17 2003-01-31,continuum,"order 1, 8250-8950 A, lines masked +-1400 km/s",0.333
+SDSS-DR17 2003-01-31,continuum,"order 1, 8380-8780 A, lines masked +-1100 km/s",0.479
+SDSS-DR17 2003-01-31,continuum,"order 1, 8380-8780 A, lines masked +-1400 km/s",0.476
+SDSS-DR17 2003-01-31,continuum,"order 2, 8330-8830 A, lines masked +-1100 km/s",0.626
+SDSS-DR17 2003-01-31,continuum,"order 2, 8330-8830 A, lines masked +-1400 km/s",0.691
+SDSS-DR17 2003-01-31,continuum,"order 2, 8250-8950 A, lines masked +-1100 km/s",0.531
+SDSS-DR17 2003-01-31,continuum,"order 2, 8250-8950 A, lines masked +-1400 km/s",0.533
+SDSS-DR17 2003-01-31,continuum,"order 2, 8380-8780 A, lines masked +-1100 km/s",0.492
+SDSS-DR17 2003-01-31,continuum,"order 2, 8380-8780 A, lines masked +-1400 km/s",0.493
+SDSS-DR17 2003-01-31,continuum,"order 3, 8330-8830 A, lines masked +-1100 km/s",0.715
+SDSS-DR17 2003-01-31,continuum,"order 3, 8330-8830 A, lines masked +-1400 km/s",0.783
+SDSS-DR17 2003-01-31,continuum,"order 3, 8250-8950 A, lines masked +-1100 km/s",0.375
+SDSS-DR17 2003-01-31,continuum,"order 3, 8250-8950 A, lines masked +-1400 km/s",0.356
+SDSS-DR17 2003-01-31,continuum,"order 3, 8380-8780 A, lines masked +-1100 km/s",-0.148
+SDSS-DR17 2003-01-31,continuum,"order 3, 8380-8780 A, lines masked +-1400 km/s",-0.507
+SDSS-DR17 2003-01-31,continuum,"order 4, 8330-8830 A, lines masked +-1100 km/s",0.642
+SDSS-DR17 2003-01-31,continuum,"order 4, 8330-8830 A, lines masked +-1400 km/s",0.666
+SDSS-DR17 2003-01-31,continuum,"order 4, 8250-8950 A, lines masked +-1100 km/s",0.52
+SDSS-DR17 2003-01-31,continuum,"order 4, 8250-8950 A, lines masked +-1400 km/s",0.562
+SDSS-DR17 2003-01-31,continuum,"order 4, 8380-8780 A, lines masked +-1100 km/s",0.527
+SDSS-DR17 2003-01-31,continuum,"order 4, 8380-8780 A, lines masked +-1400 km/s",0.645
+SDSS-DR17 2003-01-31,default,amp_rel_ref +- formal error,0.626 +- 0.257
+SDSS-DR17 2003-01-31,circular-shift null,shifts,340.0
+SDSS-DR17 2003-01-31,circular-shift null,mean,0.15
+SDSS-DR17 2003-01-31,circular-shift null,standard deviation,0.25
+SDSS-DR17 2003-01-31,circular-shift null,95th percentile,0.541
+SDSS-DR17 2003-01-31,circular-shift null,maximum,0.859
+SDSS-DR17 2003-01-31,injection,coadd profile x 0.5 added before normalisation; recovered amplitude,1.192
+SDSS-DR17 2003-01-31,injection,coadd profile x 1.0 added before normalisation; recovered amplitude,1.756

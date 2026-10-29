@@ -132,14 +132,44 @@ for _, r in d.iterrows():
 
 # Gaseous discs.
 d = T("gas_disc_white_dwarfs.csv")
+GV = T("gas_disc_variability.csv").set_index("gaia_dr3"); GI = T("gas_disc_infrared.csv").set_index("gaia_dr3")
+GA = T("gas_disc_578709631539357440_amplitude_tests.csv"); GX = T("gas_disc_578709631539357440_xshooter_metals.csv")
+
+def gas_extra(g):
+    L = []
+    if g in GV.index:
+        v = GV.loc[g]
+        L.append(f"Equivalent width in the {v.n_spectra} dated spectra with EW > 3 times its error: {v.ew_min_A}-{v.ew_max_A} A; "
+                 f"$`\\chi^2`$ = {v.chi2_formal_linefree} for {v.dof} degree{'s' if v.dof != '1' else ''} of freedom with formal and line-free errors combined "
+                 f"(gas_disc_variability.csv).")
+    if g == "578709631539357440":
+        q = GA[GA.test == "default"].set_index("spectrum").value
+        c = GA[GA.test == "continuum"].groupby("spectrum").value.apply(lambda x: f"{min(map(float, x)):.2f} to {max(map(float, x)):.2f}")
+        L.append("Scale of the SDSS-V coadd profile: " + "; ".join(f"{k} {q[k].replace('+-', '±')} (24 continuum choices: {c[k]})" for k in q.index) + ".")
+        m = GX[GX.line == "Mg II 4481"]
+        L.append("X-shooter UVB: Mg II 4481 absorption EW " + " and ".join(f"{x.ew_A} ± {x.ew_err_A} A" for x in m.itertuples()) +
+                 "; Ca II K absorption Gaussian depth " + " and ".join(f"{x.gauss_depth} ± {x.e_gauss_depth}" for x in GX[GX.line == "Ca II K"].itertuples()) + ".")
+    if g in GI.index and GI.loc[g].ls_W1_ratio:
+        i = GI.loc[g]
+        L.append(f"Legacy Surveys DR10 W1 {i.ls_W1_uJy} ± {i.ls_e_W1_uJy} uJy, W2 {i.ls_W2_uJy} ± {i.ls_e_W2_uJy} uJy; {i.model} model "
+                 f"{i.W1_model_uJy} and {i.W2_model_uJy} uJy (gas_disc_infrared.csv).")
+    if g in GI.index and GI.loc[g].twobb_T_cool_K:
+        i = GI.loc[g]
+        L.append(f"CatWISE2020 W1 {i.catwise_W1_uJy} ± {i.catwise_e_W1_uJy} uJy ({i.catwise_W1_ratio} times the {i.model} model); a two-blackbody fit to "
+                 f"Pan-STARRS1, 2MASS and CatWISE2020 gives a {int(float(i.twobb_T_cool_K))} K component with {i.twobb_cool_fraction_W1} of the W1 flux and AB "
+                 f"{i.twobb_cool_AB_0p64um} at 0.64 um (the Gaia source 0.97 arcsec away has G = 18.44).")
+    return "\n\n".join(L) or None
+
 for _, r in d.iterrows():
     desc = f"White dwarf, G = {r.G}; catalogued: {cat(r, ('snowwhite_class', 'SnowWhite'), ('simbad_type', 'SIMBAD'), ('mwdd_spectype', 'MWDD'), ('desi_dr1_class', 'DESI DR1'))}."
     peaks = f", peak velocities {r.v_blue_kms}/{r.v_red_kms} km/s" if r.v_blue_kms else ""
     ew = f"; EW {r.ew_sdssv_coadd_A} ± {r.e_ew_sdssv_coadd_A} A in the SDSS-V coadd" if r.ew_sdssv_coadd_A else ""
     obs = f"Ca II triplet emission ({r.profile}{peaks}){ew}; other spectra: {r.other_spectra or 'none'}"
     add(r.gaia_dr3, r["name"], Entry("gas_discs", "Ca II triplet emission (gaseous discs)", "gas_discs.md", desc, obs,
-        f"Ca II emission, EW {r.ew_sdssv_coadd_A} A" if r.ew_sdssv_coadd_A else f"Ca II emission ({r.profile})", ["gas_disc_white_dwarfs.csv", f"gas_disc_epochs_{r.gaia_dr3}.csv"],
-        None, ["gas_disc_epochs.py"], None))
+        f"Ca II emission, EW {r.ew_sdssv_coadd_A} A" if r.ew_sdssv_coadd_A else f"Ca II emission ({r.profile})",
+        ["gas_disc_white_dwarfs.csv", f"gas_disc_epochs_{r.gaia_dr3}.csv"] + (["gas_disc_epoch_checks.csv", "gas_disc_variability.csv", "gas_disc_line_profiles.csv",
+         "gas_disc_infrared.csv", f"gas_disc_{r.gaia_dr3}_amplitude_tests.csv", f"gas_disc_{r.gaia_dr3}_xshooter_metals.csv"] if r.gaia_dr3 in GV.index else []),
+        None, ["gas_disc_epochs.py"] + (["gas_disc_checks.py"] if r.gaia_dr3 in GV.index else []), gas_extra(r.gaia_dr3)))
 
 # Carbon lines.
 d = T("carbon_white_dwarfs.csv")

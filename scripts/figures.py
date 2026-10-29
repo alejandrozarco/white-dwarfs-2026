@@ -440,6 +440,37 @@ def gas_discs_desi():
         plt.tight_layout(); plt.savefig(out("gas_discs", f"{g}_epochs.png"), dpi=90); plt.close()
 
 
+def gas_discs_checks():
+    """WD 0856+048 (Gaia DR3 578709631539357440): the BOSS spectrum of 2010-12-05 with the SDSS-V coadd profile, the scale of that
+    profile in every spectrum, and its scale in the BOSS 2010 and SDSS 2003 spectra under 24 continuum choices (gas_disc_checks.py)."""
+    import gas_disc_epochs as GE
+    CAT = list(GE.CAT); W = GE.W; g, sid, ra, dec = "578709631539357440", "55774610", 134.841202, 4.636784
+    co, per, sp, xs = GE.all_spectra(g, sid, ra, dec); boss = [x for x in sp if x["dataset"] == "BOSS-DR17"][0]
+    nc, vc = GE.norm(co["w"], co["f"], co["iv"]); Tp = np.where(GE.WIN, gaussian_filter1d(np.nan_to_num(nc - 1), 1), 0.0)
+    fig, ax = plt.subplots(1, 3, figsize=(14, 3.8), gridspec_kw=dict(width_ratios=[1.5, 1.1, 0.8]))
+    n, v = GE.norm(boss["w"], boss["f"], boss["iv"]); e = np.arange(8420, 8722, 3.0); c = 0.5 * (e[1:] + e[:-1]); k = np.digitize(W, e) - 1
+    ok = (k >= 0) & (k < len(c)) & (v > 0) & np.isfinite(n); den = np.bincount(k[ok], v[ok], len(c))
+    y = np.bincount(k[ok], (n * v)[ok], len(c)) / np.maximum(den, 1e-30); ey = 1 / np.sqrt(np.maximum(den, 1e-30))
+    ax[0].errorbar(c, y, ey, fmt=".", ms=3, color="0.3", lw=0.6, label=f"BOSS {boss['date']} (3 A bins)")
+    ax[0].plot(W, 1 + Tp, color="C0", lw=1, label="SDSS-V coadd profile, scale 1")
+    for l in CAT:
+        ax[0].axvline(l, color="0.5", lw=0.6, ls=":")
+    ax[0].set_xlim(8420, 8720); ax[0].set_ylim(0.6, 1.6); ax[0].legend(fontsize=7, loc="upper right"); ax[0].set_xlabel("vacuum wavelength (A)"); ax[0].set_ylabel("normalised flux")
+    t = pd.read_csv(f"{T}/gas_disc_epoch_checks.csv", dtype={"gaia_dr3": str})
+    t = t[(t.gaia_dr3 == g) & (t.dataset != "SDSS-V coadd")].copy(); t["year"] = 2000 + (t.mjd - 51544.5) / 365.25
+    for ds, col in (("SDSS-DR17", "0.45"), ("BOSS-DR17", "k"), ("SDSS-V visit", "C0"), ("DESI-DR1", "C2"), ("ESO XSHOOTER VIS", "C3")):
+        q = t[t.dataset == ds]; ax[1].errorbar(q.year, q.amp_rel_ref, q.amp_err, fmt="o", ms=4, capsize=2, color=col, label=ds)
+    ax[1].axhline(0, color="0.6", lw=0.5); ax[1].axhline(1, color="C0", lw=0.5, ls="--"); ax[1].legend(fontsize=6); ax[1].set_xlabel("year")
+    ax[1].set_ylabel("scale of the SDSS-V coadd profile"); ax[1].set_title("amp_rel_ref, formal errors (gas_disc_epoch_checks.csv)", fontsize=8)
+    a = pd.read_csv(f"{T}/gas_disc_{g}_amplitude_tests.csv"); a = a[a.test == "continuum"]
+    for i, (lab, q) in enumerate(a.groupby("spectrum", sort=False)):
+        vals = q.value.astype(float).values; ax[2].plot(np.full(len(vals), i) + np.linspace(-0.15, 0.15, len(vals)), vals, "o", ms=3, color=("k", "0.45")[i % 2])
+    ax[2].set_xticks(range(a.spectrum.nunique())); ax[2].set_xticklabels([x.replace("-DR17", "") for x in a.spectrum.unique()], fontsize=7)
+    ax[2].axhline(0, color="0.6", lw=0.5); ax[2].axhline(1, color="C0", lw=0.5, ls="--"); ax[2].set_xlim(-0.6, 1.6)
+    ax[2].set_title("24 continuum choices", fontsize=8); ax[2].set_ylabel("scale of the SDSS-V coadd profile")
+    fig.suptitle("WD 0856+048 = Gaia DR3 578709631539357440", fontsize=9); plt.tight_layout(); plt.savefig(out("gas_discs", f"{g}_amplitude.png"), dpi=90); plt.close()
+
+
 def reflection():
     """Gaia DR3 3107374277060584064: light curves folded on the adopted frequency and emission-line velocities against phase (phase 0 =
     maximum of the ZTF r fit); SDSS-V spectrum with H-beta, H-alpha and Ca II profiles per visit."""
@@ -669,7 +700,7 @@ if __name__ == "__main__":
     import sys
     ALL = dict(zeeman=zeeman, carbon_optical=carbon_optical, carbon_screen_spectra=carbon_screen_spectra, carbon_cos=carbon_cos, galex=galex,
                eclipse=eclipse, eclipse_4851800979770492544=eclipse_4851800979770492544, balmer=balmer, zz=zz, periodic=periodic, periodic_white_dwarfs=periodic_white_dwarfs,
-               hot_dq_comparison=hot_dq_comparison, hot_dq_comparison_sdssv=lambda: hot_dq_comparison(extra=True), gas_discs=gas_discs, gas_discs_narrow=gas_discs_narrow, gas_discs_desi=gas_discs_desi, reflection=reflection, hot_white_dwarfs=hot_white_dwarfs, irradiated_companions=irradiated_companions, hot_dae_wd_periods=hot_dae_wd_periods,
+               hot_dq_comparison=hot_dq_comparison, hot_dq_comparison_sdssv=lambda: hot_dq_comparison(extra=True), gas_discs=gas_discs, gas_discs_narrow=gas_discs_narrow, gas_discs_desi=gas_discs_desi, gas_discs_checks=gas_discs_checks, reflection=reflection, hot_white_dwarfs=hot_white_dwarfs, irradiated_companions=irradiated_companions, hot_dae_wd_periods=hot_dae_wd_periods,
                line_variability=line_variability, field_variability=field_variability, rv_variable_da=rv_variable_da)
     for name in (sys.argv[1:] or ALL):
         ALL[name](); print(name, "done", flush=True)
