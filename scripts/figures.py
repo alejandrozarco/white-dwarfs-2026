@@ -696,11 +696,54 @@ def rv_variable_da():
         plt.tight_layout(); plt.savefig(out("rv_variable_da", f"{s.gaia_dr3}.png"), dpi=90); plt.close()
 
 
+def oxygen_emission():
+    """Gaia DR3 6488421971834040576: O I 7774 and 8446 in each SDSS-V visit and in the stack of the four exposures (flux divided by a linear
+    continuum fitted 25-70 A from the line, 2-pixel smoothing, offsets of 0.8), with the joint fit to the stack (red) and the stack's pipeline
+    sky model divided by the same continuum and scaled by 0.1 (grey); both lines of the stack and of WD J0914+1914 in velocity; H-alpha."""
+    import oxygen_emission as OE
+    o = pd.read_csv(f"{T}/oxygen_emission.csv", dtype={"gaia_dr3": str}).set_index("gaia_dr3"); r = o.loc[OE.GAIA]
+    S = {(g, i): s for g, i, _, s in OE.spectra()}; st = [S[k] for k in S if k[0] == OE.GAIA and k[1].startswith("exposures")][0]
+    rows = [(f"MJD {m}", S[(OE.GAIA, f"visit {m}")]) for m in (60203, 60206)] + [("stack of 4 exposures", st)]
+
+    def cont(s, lam):
+        w, f, iv = s["w"], s["f"], s["iv"]; m = (np.abs(w - lam) > 25) & (np.abs(w - lam) < 70) & (iv > 0)
+        return np.polyval(np.polyfit(w[m] - lam, f[m], 1, w=np.sqrt(iv[m])), w - lam)
+    fig, ax = plt.subplots(1, 4, figsize=(13, 3.6), gridspec_kw=dict(width_ratios=[1, 1, 1.3, 1]))
+    for a, line in zip(ax[:2], OE.LINES):
+        lam = OE.REF[line]
+        for k, (lab, s) in enumerate(rows):
+            m = (np.abs(s["w"] - lam) < 80) & (s["iv"] > 0); c = cont(s, lam)
+            a.plot(s["w"][m], gaussian_filter1d(s["f"][m] / c[m], 2) + 0.8 * (2 - k), "k", lw=0.8)
+            a.text(lam - 78, 1.25 + 0.8 * (2 - k), lab, fontsize=6.5)
+        m = (np.abs(st["w"] - lam) < 80) & (st["iv"] > 0); c = cont(st, lam); x = st["w"][m]; sg = lam * r.joint_sigma_v_kms / C
+        g = r[f"joint_flux_{line}"] / (np.sqrt(2 * np.pi) * sg) * np.exp(-0.5 * ((x - lam * (1 + r.joint_v_kms / C)) / sg) ** 2)
+        a.plot(x, 1 + g / c[m], "r", lw=1); a.plot(x, 0.1 * st["sky"][m] / c[m] - 0.9, color="0.5", lw=0.7)
+        a.axvline(lam, color="0.6", ls=":", lw=0.7); a.set_ylim(-1, 3.4); a.set_xlabel("vacuum wavelength (A)")
+        a.set_title(f"O I {line[1:]}", fontsize=8); a.text(lam - 78, -0.6, "sky model x 0.1", fontsize=6, color="0.4")
+    ax[0].set_ylabel("flux / continuum (+ offset)")
+    for g, lab, off, ls in ((OE.GAIA, "this star (stack)", 0.0, "-"), (OE.J0914, "WD J0914+1914 (coadd)", -0.7, "--")):
+        s = st if g == OE.GAIA else S[(OE.J0914, "visit 60653")]
+        for line, col in zip(OE.LINES, ("C0", "C1")):
+            lam = OE.REF[line]; v = (s["w"] / lam - 1) * C; m = (np.abs(v) < 2000) & (s["iv"] > 0); c = cont(s, lam)
+            ax[2].plot(v[m], gaussian_filter1d(s["f"][m] / c[m] - 1, 2) + off, color=col, ls=ls, lw=0.9, label=f"{lab}, O I {line[1:]}")
+        ax[2].text(0.02, 0.09 if g == OE.GAIA else 0.03, f"{lab}: sigma_v {o.loc[g, 'joint_sigma_v_kms']:.0f} ± {o.loc[g, 'joint_e_sigma_v_kms']:.0f} km/s, "
+                   f"F(8446)/F(7774) {o.loc[g, 'joint_ratio_8446_7774']:.2f} ± {o.loc[g, 'joint_e_ratio_8446_7774']:.2f}", fontsize=5.5, transform=ax[2].transAxes, va="bottom")
+    ax[2].axvline(0, color="0.6", ls=":", lw=0.7); ax[2].set_xlim(-2000, 2000); ax[2].set_ylim(-1.3, 1.5); ax[2].legend(fontsize=5.5, loc="upper right")
+    ax[2].set_xlabel("velocity from the O I multiplet centroid (km/s)"); ax[2].set_ylabel("flux / continuum - 1 (+ offset)")
+    for k, (lab, s) in enumerate(rows):
+        w, f, iv = s["w"], s["f"], s["iv"]; m = (w > 6420) & (w < 6710) & (iv > 0); sd = ((w > 6420) & (w < 6460)) | ((w > 6670) & (w < 6710))
+        c = np.polyval(np.polyfit(w[sd & (iv > 0)], f[sd & (iv > 0)], 1), w)
+        ax[3].plot(w[m], gaussian_filter1d(f[m] / c[m], 2) + 0.5 * (2 - k), "k", lw=0.8); ax[3].text(6425, 1.12 + 0.5 * (2 - k), lab, fontsize=6.5)
+    ax[3].axvline(6564.61, color="0.6", ls=":", lw=0.7); ax[3].set_title("H-alpha", fontsize=8); ax[3].set_xlabel("vacuum wavelength (A)")
+    fig.suptitle(f"Gaia DR3 {OE.GAIA} ({OE.NAME}), SDSS-V DR20 BOSS (LCO, fibre {OE.FIBRE}); pipeline heliocentric frame", fontsize=8)
+    plt.tight_layout(); plt.savefig(out("oxygen_emission", f"{OE.GAIA}.png"), dpi=90); plt.close()
+
+
 if __name__ == "__main__":
     import sys
     ALL = dict(zeeman=zeeman, carbon_optical=carbon_optical, carbon_screen_spectra=carbon_screen_spectra, carbon_cos=carbon_cos, galex=galex,
                eclipse=eclipse, eclipse_4851800979770492544=eclipse_4851800979770492544, balmer=balmer, zz=zz, periodic=periodic, periodic_white_dwarfs=periodic_white_dwarfs,
                hot_dq_comparison=hot_dq_comparison, hot_dq_comparison_sdssv=lambda: hot_dq_comparison(extra=True), gas_discs=gas_discs, gas_discs_narrow=gas_discs_narrow, gas_discs_desi=gas_discs_desi, gas_discs_checks=gas_discs_checks, reflection=reflection, hot_white_dwarfs=hot_white_dwarfs, irradiated_companions=irradiated_companions, hot_dae_wd_periods=hot_dae_wd_periods,
-               line_variability=line_variability, field_variability=field_variability, rv_variable_da=rv_variable_da)
+               line_variability=line_variability, field_variability=field_variability, rv_variable_da=rv_variable_da, oxygen_emission=oxygen_emission)
     for name in (sys.argv[1:] or ALL):
         ALL[name](); print(name, "done", flush=True)

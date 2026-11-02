@@ -286,6 +286,19 @@ for _, r in d.iterrows():
     add(r.gaia_dr3, r["name"], Entry("rv_variable_da", "Radial-velocity variable DA white dwarfs (double white dwarf candidates)", "rv_variable_da.md", desc, obs,
         f"**velocity change {float(r.store_dv_pair):.0f} km/s in 1 d**", ["rv_variable_da.csv", "rv_variable_da_velocities.csv"], None, ["rv_variable_da.py"], None))
 
+# O I 7774 and 8446 emission.
+d = T("oxygen_emission.csv")
+for _, r in d[d.role == "object"].iterrows():
+    desc = (f"White dwarf, G = {r.G}, M_G = {r.M_G}; catalogued: SnowWhite {r.snowwhite_class} ({float(r.snowwhite_teff_K) / 1000:.1f} kK, "
+            f"p_DA {float(r.snowwhite_p_da):.2f}, p_CV {float(r.snowwhite_p_cv):.2f}); SIMBAD WD*/DA; MWDD DA.")
+    obs = (f"O I 7774 and 8446 emission in each of four SDSS-V BOSS exposures (MJD 60203 and 60206; one instrument and one fibre): mean fluxes "
+           f"{float(r.frames_flux_o7774):.1f} ± {float(r.frames_e_flux_o7774):.1f} and {float(r.frames_flux_o8446):.1f} ± {float(r.frames_e_flux_o8446):.1f} × 10⁻¹⁷ erg s⁻¹ cm⁻², "
+           f"velocity dispersion {float(r.frames_sigma_v_kms):.0f} ± {float(r.frames_e_sigma_v_kms):.0f} km/s, wavelength ratio {float(r.centre_ratio):.5f} ± {float(r.e_centre_ratio):.5f} "
+           f"(O I: {r.centre_ratio_oi}); no spectrum from another instrument")
+    add(r.gaia_dr3, r["name"], Entry("oxygen_emission", "O I 7774 and 8446 emission", "oxygen_emission.md", desc, obs,
+        f"O I 7774 and 8446 emission, {float(r.frames_flux_o7774):.0f} and {float(r.frames_flux_o8446):.0f} × 10⁻¹⁷ erg s⁻¹ cm⁻² (one instrument)",
+        ["oxygen_emission.csv", "oxygen_emission_exposures.csv"], None, ["oxygen_emission.py"], None))
+
 # Write the object pages.
 PAGE_LEAD = {
     "2249098833310553728": "A catalogued but unclassified 63.7-minute variable: a coherent modulation on an over-luminous "
@@ -295,7 +308,7 @@ PAGE_LEAD = {
     "measurement (a red source 3.7 arcsec away dominates WISE) exist, so the companion's nature is open.",
 }
 ORDER = ["gas_discs", "carbon", "zeeman", "periodic", "zz_ceti", "eclipse_and_emission", "hot_white_dwarfs",
-         "irradiated_companions", "hot_wd_periods", "dae_wd_periods", "line_variability", "field_variability", "rv_variable_da"]
+         "irradiated_companions", "hot_wd_periods", "dae_wd_periods", "line_variability", "field_variability", "rv_variable_da", "oxygen_emission"]
 for gaia, o in objects.items():
     name = o["name"] or f"Gaia DR3 {gaia}"
     head = name if gaia in name else f"{name} (Gaia DR3 {gaia})"
@@ -324,7 +337,7 @@ TITLES = {"gas_discs": "Ca II triplet emission (gaseous discs)", "carbon": "Carb
           "irradiated_companions": "Short-period white dwarfs with irradiated companions",
           "hot_wd_periods": "Day-scale periods of hot white dwarfs", "dae_wd_periods": "Periods of DA white dwarfs with emission lines",
           "line_variability": "Hydrogen and helium line strengths that change between visits", "field_variability": "Magnetic field strength changing between visits",
-          "rv_variable_da": "Radial-velocity variable DA white dwarfs (double white dwarf candidates)"}
+          "rv_variable_da": "Radial-velocity variable DA white dwarfs (double white dwarf candidates)", "oxygen_emission": "O I 7774 and 8446 emission"}
 MARK = {
     "4851800979770492544": 4, "6722639595190126208": 4, "3161618477052648192": 3, "4996506979251027584": 3, "303768056000635776": 3, "5467851842959399808": 3, "6177529630243170432": 3, "2482810406432480512": 3,
     "2249098833310553728": 5,
@@ -377,7 +390,8 @@ NOBOLD = {"974895286283420160", "1157401396015448960", "920621124593362816", "14
           "6021870154194477312",
           "1879989790567353344",
           "2311285729210966144",
-          "3365371721281530880"}
+          "3365371721281530880",
+          "6488421971834040576"}
 
 idx = []
 for topic in ORDER:
